@@ -74,21 +74,23 @@ logging.basicConfig(
 #   languages = quest.languages.split(',')
 #   LN = languages[quest.selected_language]
 
-def load_data():
+def load_ln():
     quest = load_current_quest()
-    VOL = quest.main_vol
     languages = quest.languages.split(',')
-    LN = languages[quest.selected_language]
-    return LN, VOL
+    return languages[quest.selected_language]
 
+def load_vol():
+    quest = load_current_quest()
+    return quest.main_vol
 
 def init_music():
     global back_music, back_player, action_player, players, LN, VOL
-    LN, VOL = load_data()
     players = []
-    logging.info(f"player -> initiate")
+    LN = load_ln()
+    VOL = load_vol()
     back_player = PlayerDecorator(BACK_PATH + DEFAULT_BACK)
     action_player = PlayerDecorator(SYSTEM_PATH + DEFAULT_SYSTEM)
+    logging.info(f"player -> initiate")
     action_player.resume()
     logging.info(f"player/action -> welcome sound")
     while True:
