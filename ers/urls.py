@@ -21,6 +21,7 @@ urlpatterns = [
     path('sound/<str:sound_type>/<int:riddle>', v.sound_list),
 
     path('data', v.data),
+    path('debug', v.debug),
     path('report', v.report),
     path('statistic/<str:action>', v.statistic),
 

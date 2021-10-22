@@ -1,0 +1,84 @@
+<html>
+    <head>
+        {% load static %}
+        <script src="{% static 'lib/jsMQTT/mqttws31.js' %}"></script>
+    </head>
+    <body>
+        <h3>DEBUG MUSIC CONTROLLER:</h3>
+
+        <h5>async player:</h5>
+        <input id="aplay_pay" placeholder="1-260"></body>
+        <button onclick="pub(val('aplay_pay'),'/er/async/play')">asinc  play</button>
+        <br>
+        <input id="hint_pay" placeholder="1-260"></body>
+        <button onclick="pub(val('hint_pay'),'/er/async/hint/play')">async hint</button>
+
+        <br>
+        <input id="ahint_pay" placeholder="1-260"></body>
+        <button onclick="pub(val('ahint_pay'),'/er/async/auto/play')">asinc auto play</button>
+
+
+        <br>
+        <button onclick="pub('','/er/async/stop')">async stop</button>
+
+        <br>
+        <button onclick="pub('reset','/er/async')">async reset</button>
+
+        <br>
+        <h5>sync player:</h5>
+        <br>
+        <input id="action_pay" placeholder="1-260"></body>
+        <button onclick="pub(val('action_pay'),'/er/music/play')">action play</button>
+
+        <br>
+        <input id="action_pay" placeholder="1-260"></body>
+        <button onclick="pub(val('action_pay'),'/er/music/play')">action play</button>
+
+
+
+
+
+
+        <script>
+         var MQTT_ADDR = "192.168.10.1";
+         var MQTT_PORT = 8080;
+         var clientId = "id_" + parseInt(Math.random() * 1000, 10);
+         var client = new Messaging.Client(MQTT_ADDR, MQTT_PORT, clientId);
+         var options = {
+             timeout: 3,
+             onSuccess: () => {
+                 console.log(
+                     "MQTT: Connected: " + MQTT_ADDR + ":" + MQTT_PORT + ", id: " + clientId
+                 );
+                 /* topic.forEach((e) => {
+                  *     mqtt_subscribe(e);
+                  *     // console.log("MQTT: Subscribed: " + e);
+                  * }); */
+             },
+             onFailure: (message) => {
+                 console.log(
+                     "Error: MQTT: Connection: " +
+                     MQTT_ADDR +
+                     ":" +
+                     MQTT_PORT +
+                     ": " +
+                     message.errorMessage
+                 );
+             },
+         };
+
+         client.connect(options);
+         function val(name){
+             let elem = document.getElementById(name);
+             return elem.value;
+         }
+         function pub(payload, topic, _qos) {
+             if (typeof _qos == "undefined") _qos = 2;
+             var message = new Messaging.Message(payload);
+             message.destinationName = topic;
+             message.qos = _qos;
+             client.send(message);
+}
+        </script>
+    </body>
+</html>

@@ -325,3 +325,6 @@ def statistic(request, action=''):
             s.save()
             json = {"status": "time up"}
     return JsonResponse(json)
+
+def debug(request):
+    return render(request, "debug.html", {})
