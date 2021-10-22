@@ -15,17 +15,20 @@ from mplayer import *
 #confign
 MQTT_PORT = 1883
 MQTT_HOST = "192.168.10.1"
-MEDIA_PATH =  "erp/media"
-BACK_PATH = join(getcwd(), MEDIA_PATH, "back/")
-SYSTEM_PATH = join(getcwd(), MEDIA_PATH,"system/")
-HINT_PATH = join(getcwd(), MEDIA_PATH, "hint/")
 DEFAULT_BACK = '001_back.mp3'
 DEFAULT_SYSTEM = '001_welcome.mp3'
 LOGGING_PATH = "erserver.log"
+MEDIA_PATH =  "erp/media"
+BACK_PATH = join(getcwd(), MEDIA_PATH, "back/")
+HINT_PATH = join(getcwd(), MEDIA_PATH, "hint/")
+AUTO_PATH = join(getcwd(), MEDIA_PATH, "auto/")
+ACTION_PATH = join(getcwd(), MEDIA_PATH,"action/")
+SYSTEM_PATH = join(getcwd(), MEDIA_PATH,"system/")
+DEFAULT_PATH = join(getcwd(), MEDIA_PATH, "base/")
 
 LOGGING_LVL = logging.INFO
 SUBSCRIBE = [
-    "/er/async",
+    "/er/async/reset",
     "/er/async/play",
     "/er/async/hint/play",
     "/er/async/auto/play",
@@ -44,13 +47,11 @@ SUBSCRIBE = [
 
 #global variable
 client = None
-back_music = ""
 back_player = None
 action_player = None
 players = []
 LN = ''
 VOL = 60
-
 
 # setup logging
 logging.basicConfig(
@@ -63,10 +64,6 @@ logging.basicConfig(
 #   num = sound_num if len(sound_num) == 3 else '0' + sound_num
 #   path = join(getcwd(), MEDIA_PATH, sound_type)
 #   print(path)
-
-#   logging.info(f"player -> get {sound_lang}{sound_type}{sound_num}")
-#   sound_name = list(filter(lambda s:s.startswith(f'|{num}|{sound_lang}|'), os.listdir(path)))[0]
-#   return sound_name
 
 # def reset_music():
 #   global LN
@@ -83,8 +80,87 @@ def load_vol():
     quest = load_current_quest()
     return quest.main_vol
 
+def sound_path(path, ln, numb):
+    try:
+        int(numb)
+    except ValueError:
+        logging.error(f"player -> wrong sound number {numb}, number set 001")
+        numb = '001'
+    if int(numb) < 1 or int(numb) > 260:
+        logging.warning(f"player -> wrong sound number {numb}, number set 001")
+        numb = '001'
+    while len(numb) != 3:
+        numb = '0' + numb
+    sound = list(filter(
+        lambda s:s.startswith(f'|{numb}|{ln}|'),
+        os.listdir(path)))
+    if len(sound) == 1:
+        logging.info(f"player -> find sound {sound[0]}")
+        return path + sound[0]
+    if len(sound) > 1:
+        logging.warning(f"player -> find {len(names)} sound files: {names}")
+        return path + sound[0]
+    if len(sound) == 0:
+        logging.warning(f"player -> dont find sound files with {numb} and {ln}")
+        sound = list(filter(
+            lambda s:s.startswith(f'{numb}'), os.listdir(DEFAULT_PATH)))
+        logging.warning(f"player -> find default sound files {sound[0]}")
+        return DEFAULT_PATH + sound[0]
+
+def async_play(path, ln, arr):
+    global players
+    class AsyncPlayerDecorator:
+        def __init__(self, song_path):
+            self._is_paused = False
+            self._player = Player()
+            self._player.volume = VOL
+            self._player.loadfile(song_path)
+            # self._player.pause()
+
+        def load(self, song_path):
+            # print("load path" , soug_path)
+            self._player.loadfile(song_path)
+            self._is_paused = False
+
+        # def load_cwd(self, song_name):
+        #     print("start playing: " + join(getcwd(), MEDIA_PATH, song_name))
+        #     self.load(join(getcwd(), MEDIA_PATH, song_name))
+
+        def pause(self):
+            if not self._is_paused:
+                self._player.pause()
+                self._is_paused = True
+
+        def resume(self):
+            if self._is_paused:
+                self._player.pause()
+                self._is_paused = False
+
+        def set_volume(self, volume):
+            # print("volume: ", volume)
+            if 0 <= volume <= 100:
+                self._player.volume = volume
+
+        def is_alive(self):
+            return self._player.is_alive()
+
+        def quit(self):
+            self._player.quit()
+
+
+    new_player = AsyncPlayerDecorator(sound_path(HINT_PATH, LN, arr))
+    new_player.resume()
+
+    #drop dead players
+    for i in range(len(players)):
+        if not players[i].is_alive():
+            del players[i]
+
+    players.append(new_player)
+
+
 def init_music():
-    global back_music, back_player, action_player, players, LN, VOL
+    global back_player, action_player, players, LN, VOL
     players = []
     LN = load_ln()
     VOL = load_vol()
@@ -122,110 +198,65 @@ def mqtt_init(topics):
     client.on_message = on_message
     client.on_disconnect = on_disconnect
 
-def find_sound(path, ln, numb):
-    sound = list(filter(
-        lambda s:s.startswith(f'|{numb}|{ln}|'),
-        os.listdir(path)))
-    if len(sound) == 1:
-        logging.info(f"player -> find sound {sound[0]}")
-        return sound[0]
-    if len(soudn) > 1:
-        logging.warning(f"player -> find {len(names)} sound files: {names}")
-        return sound[0]
-    if len(sound) == 0:
-        logging.warning(f"player -> dont find sound files with {numb} and {ln}")
-        #todo add return
 
 def manage_music(topic, arr):
     global players, action_player, back_player, LN
-    if topic == "/er/async" and arr == 'reset':
-        quest = load_current_quest()
-        languages = quest.languages.split(',')
-        LN = languages[quest.selected_language]
-        for i in range(len(players)):
-            del players[i]
-        players = []
-        logging.info(f"player/async -> reset")
-
-
-    if topic == "/er/async/hint/play":
-        path = join(getcwd(), MEDIA_PATH, 'hint')
-        print(path)
-        sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
-        print(sound_name)
-        for i in range(len(players)):
-            if not players[i].is_alive():
-                del players[i]
-        # print(path+sound_name)
-
-        new_player = AsyncPlayerDecorator(join(path,sound_name))
-        new_player.resume()
-        players.append(new_player)
-
-    if topic == "/er/async/auto/play":
-        path = join(getcwd(), MEDIA_PATH, 'auto')
-
-        arr = arr if len(arr) == 3 else '0' + arr
-        sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
-        for i in range(len(players)):
-            if not players[i].is_alive():
-                del players[i]
-
-        new_player = AsyncPlayerDecorator(join(path,sound_name))
-        new_player.resume()
-        players.append(new_player)
 
     if topic == "/er/async/play":
-        for i in range(len(players)):
-            if not players[i].is_alive():
-                del players[i]
-        new_player = AsyncPlayerDecorator(join(getcwd(), MEDIA_PATH, arr))
-        new_player.resume()
-        players.append(new_player)
+        async_play(MEDIA_PATH, LN, arr)
+        logging.info(f"player/async -> play")
 
+    if topic == "/er/async/hint/play":
+        async_play(HINT_PATH, LN, arr)
+        logging.info(f"player/async/hint -> play")
+
+    if topic == "/er/async/auto/play":
+        async_play(AUTO_PATH, LN, arr)
+        logging.info(f"player/async/auto -> play")
 
     if topic == "/er/async/stop":
         for player in players:
             player.pause()
+        logging.info(f"player/async -> stop")
+
+    if topic == "/er/async/reset":
+        LN = load_ln()
         players = []
+        logging.info(f"player/async -> reset")
+
 
     if topic == "/er/music/play":
-        arr = arr if len(arr) == 3 else '0' + arr
-        path = join(getcwd(), MEDIA_PATH, 'system')
-        print(path)
+        # arr = arr if len(arr) == 3 else '0' + arr
+        # path = join(getcwd(), MEDIA_PATH, 'system')
+        # print(path)
         # sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
-        sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))
-        print(sound_name)
-        action_player.load(join(path,sound_name))
+        # sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))
+        # print(sound_name)
+        action_player.load(sound_path(ACTION_PATH, LN, arr))
+        logging.info(f"player/action -> play")
 
-    if topic == "/er/music/stop":
+    if topic == "/er/music/stop" or topic == "/er/mc1/pause":
         action_player.pause()
+        logging.info(f"player/action -> pause")
 
-    if topic == "/er/musicback/play":
-        back_player.resume()
-
-    if topic == "/er/musicback/stop":
-        back_player.pause()
-
-    if topic == "/er/mc1/pause":
-        action_player.pause()
-
-    if topic == "/er/mc1/resume":
+    if topic == "/er/music/play" or topic == "/er/mc1/resume":
         action_player.resume()
+
+    if topic == "/er/musicback/play" or topic == "/er/mc2/resume":
+        back_player.resume()
+        logging.info(f"player/back -> play")
+
+    if topic == "/er/musicback/stop" or topic == "/er/mc2/pause":
+        back_player.pause()
+        logging.info(f"player/back -> stop")
 
     if topic == "/er/mc1/vol/set":
         action_player.set_volume(int(arr))
+        logging.info(f"player/action/vol -> set {arr}")
 
     if topic == "/er/mc2/vol/set":
         back_player.set_volume(int(arr))
-
-    if topic == "/er/mc2/pause":
-        back_player.pause()
-
-    if topic == "/er/mc2/resume":
-        back_player.resume()
-
-
+        logging.info(f"player/back/vol -> set {arr}")
 
 
 def mqtt_routine(host, port):
@@ -242,13 +273,13 @@ class PlayerDecorator:
         self._player.pause()
 
     def load(self, song_path):
-        print("load path" , song_path)
+        # print("load path" , song_path)
         self._player.loadfile(song_path)
         self._is_paused = False
 
-    def load_cwd(self, song_name):
-        print("start playing: " + join(getcwd(), MEDIA_PATH, song_name))
-        self.load(join(getcwd(), MEDIA_PATH, song_name))
+    # def load_cwd(self, song_name):
+    #     print("start playing: " + join(getcwd(), MEDIA_PATH, song_name))
+    #     self.load(join(getcwd(), MEDIA_PATH, song_name))
 
     def pause(self):
         if not self._is_paused:
@@ -261,7 +292,6 @@ class PlayerDecorator:
             self._is_paused = False
 
     def set_volume(self, volume):
-        print("volume: ", volume)
         if 0 <= volume <= 100:
             self._player.volume = volume
 
@@ -271,45 +301,6 @@ class PlayerDecorator:
     def quit(self):
         self._player.quit()
 
-
-class AsyncPlayerDecorator:
-    def __init__(self, song_path):
-        self._is_paused = False
-
-        self._player = Player()
-        self._player.volume = VOL
-        self._player.loadfile(song_path)
-        # self._player.pause()
-
-    def load(self, song_path):
-        print("load path" , soug_path)
-        self._player.loadfile(song_path)
-        self._is_paused = False
-
-    def load_cwd(self, song_name):
-        print("start playing: " + join(getcwd(), MEDIA_PATH, song_name))
-        self.load(join(getcwd(), MEDIA_PATH, song_name))
-
-    def pause(self):
-        if not self._is_paused:
-            self._player.pause()
-            self._is_paused = True
-
-    def resume(self):
-        if self._is_paused:
-            self._player.pause()
-            self._is_paused = False
-
-    def set_volume(self, volume):
-        print("volume: ", volume)
-        if 0 <= volume <= 100:
-            self._player.volume = volume
-
-    def is_alive(self):
-        return self._player.is_alive()
-
-    def quit(self):
-        self._player.quit()
 
 
 mqtt_init(SUBSCRIBE)
