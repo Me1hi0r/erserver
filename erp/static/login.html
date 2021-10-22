@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    {% load static %}
+    <title>Authentication</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'abc.ico' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{% static 'lib/jsMQTT/mqttws31.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'login.css' %}" />
+    <script src="{% static 'login.js' %}" defer></script>
+  </head>
+
+  <body>
+    <div id="wrapper" class="wrapper">
+      <div class="container">
+        <h1>
+          <div id="main_text">
+            Welcome
+          </div>
+        </h1>
+        <form class="form" method="post">
+          {% csrf_token %}
+          <input type="text" id="user" name="user_name" placeholder="Username">
+          <input type="password" id="pass" name="pass_word" placeholder="Password">
+          <button type="submit" id="login-button">Login</button>
+        </form>
+      </div>
+      <ul class="bg-bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
+    </div>
+  </body>
+</html>

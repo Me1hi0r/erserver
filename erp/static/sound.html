@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    {% load static %}
+    <title>Sound</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="{% static 'abc.ico' %}" />
+    <link rel="stylesheet" href="{% static 'lib/dropzone-5.7.0/dist/dropzone.css' %}" />
+    <script src="{% static 'lib/dropzone-5.7.0/dist/dropzone.js' %}"></script>
+    <script src="{% static 'lib/jsMQTT/mqttws31.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'sound.css' %}">
+    <script src="{% static 'sound.js' %}"></script>
+  </head>
+  <body>
+    <nav>
+      <ul class="nav-bar-ul">
+        <li><a href="/config">settings</a></li>
+        <li><a href="/" id="btnReset">RESET SOUND</a></li>
+      </ul>
+    </nav>
+    <form id="main-form" action="/sound/reset" method="post">
+      {% csrf_token %}
+    </form>
+
+    <!-- <div class="riddle-player" > -->
+        <div class="music-player column add-bottom">
+          <div id="audio0">
+            <div id="player_title"></div>
+            <div id="npTitle">Please, select sound </div>
+            <div class="container1">
+              <button type="submit" id="select-sound-button" hidden>SELECT</button>
+              <audio id="audio1" preload controls autoplay>Browser does not support HTML5 Audio!</audio>
+            </div>
+          </div>
+        </div>
+        <!-- </div> -->
+
+    </div>
+    <div class="container">
+      <div class="sound-type" >
+        Type of sound:
+        <ul class='type-list-btn'>
+          <li><div class="sound-type-item" id="hint">Hints</div></li>
+          <li><div class="sound-type-item" id="auto">Auto hints</div></li>
+          <li><div class="sound-type-item" id="action">Action sound</div></li>
+          <li><div class="sound-type-item" id="system">System sounds</div></li>
+          <li><div class="sound-type-item" id="back">Background</div></li>
+          <li><text style="opacity: 0;">1</text></li>
+        </ul>
+      </div>
+      <div class="riddle-body" style="display: none;">
+        Riddle list:
+        <ul class="riddle-list">
+            {% for rid in  quest_riddles%}
+          <li>
+            <a  class="riddle-item" id="btn_{{rid.erp_num}}" onclick="selectRiddle({{rid.erp_num}})">
+              {{ rid.erp_name }}
+            </a>
+          </li>
+          {% endfor %}
+          <li><text style="opacity: 0;">1</text></li>
+        </ul>
+      </div>
+      <script>Dropzone.autoDiscover = false;</script>
+      <div class="riddle-sound" style="display: none">
+        Sound list
+        <div class="sound-lang-select"></div>
+        <div class="sound-text"></div>
+        <div class="drop-zone ds-panel" style="visibility: hidden">
+          <form method="POST" enctype="multipart/form-data" action="/upload_sound" class="dropzone" id="myDrop1">
+            {% csrf_token %}
+            <div class="dz-message needsclick dz-clickable chunking">
+              <button type="file" class="dz-button">
+                Drop mp3 files here.
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

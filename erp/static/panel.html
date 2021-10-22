@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    {% load static %}
+    {% load custom_tags %}
+    <title>Riddles</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'abc.ico' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache"/>
+    <script src="{% static 'lib/jsMQTT/mqttws31.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'panel.css' %}">
+    <script src="{% static 'panel.js' %}"></script>
+  </head>
+
+  <body>
+    <nav>
+      <ul class="nav-bar-ul">
+          <li><a href="/config">settings</a></li>
+        <li><a href="/" id="btnStart">Start</a></li>
+        <li><a href="/" id="btnAddTime">+ min</a></li>
+        <li><a href="/" id="btnReset">Reset</a></li>
+      </ul>
+    </nav>
+    <div class="wrap-riddle">
+      <progress hidden class="progress pr1" id="maintime" max="9999" value="{{time_set_val}}" data-label="" ></progress>
+      <div id="timer-firefox" style=" font-size: 180px; font-weight: 700; margin-top: 50px;">00:00</div>
+      <div class="riddle-list" >
+        <div class="cards-list">
+            {% if quest_riddles %}
+            {% for rid in quest_riddles %}
+            <div class="card {{ forloop.counter }}" erpnum="{{rid.erp_num}}" order="{{rid.panel_order}}" erpname ="{{rid.erp_name}}">
+                <!-- <div class="card {{ forloop.counter }}" style="order: {{rid.panel_order}};" erpnum="{{rid.erp_num}}" order="{{rid.panel_order}}" erpname ="{{rid.erp_name}}"> -->
+            <div class="front" >
+              <div class="card_numb">
+                <p>{{rid.panel_order}}</p>
+
+              </div>
+              <div class="card_title">
+                <p>{{rid.panel_name}}</p>
+              </div>
+            </div>
+            <div class="back" hidden>
+              <div class="card_numb" >
+                {{rid.panel_name}} is <span class="rid_status"></span>
+              </div>
+              <div class="btn_activ">
+                <button class="custom-btn btn-act reset" id="reset_{{rid.erp_name}}">Reset</button>
+                <button class="custom-btn btn-act start" id="activate_{{rid.erp_name}}">Start</button>
+                <button class="custom-btn btn-act finish" id="finish_{{rid.erp_name}}">Finish</button>
+              </div>
+              <div class="btns_wrapper">
+                  {% if rid.sound_hints %}
+                <div class="btns_audio">
+                  <div class="btns_label">
+                    Audio hints:
+                  </div>
+                  {% for c in 1|range:rid.sound_hints %}
+                  <button class="custom-btn btn-2" id="hint_{{rid.erp_num}}_{{c}}">{{c}}</button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                {% if rid.video_hints %}
+                <div class="btns_video">
+                  <div class="btns_label">Video hints:</div>
+                  {% for c in 1|range:rid.video_hints %}
+                  <button class="custom-btn btn-2" id="video_{{rid.erpnum}}_{{c}}">{{c}}</button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              <br>
+            </div>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <!-- <ul id="ul-riddles" class="ds-ul"></ul> -->
+  </body>
+</html>

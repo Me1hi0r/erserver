@@ -1,0 +1,245 @@
+form {
+    color: white;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+.inp {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: 0;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.2);
+
+    border-radius: 3px;
+    /* padding: 10px 15px; */
+    margin: 0 auto 0 auto;
+    /* display: block; */
+    text-align: center;
+    font-size: 18px;
+    color: var(--main-bg-color);
+    -webkit-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+    font-weight: 300;
+}
+
+.inp.numb{ width: 2em;}
+.inp.id{ width: 8em;}
+.inp.name{ width: 10em;}
+.inp.order{ width: 2em;}
+.inp.auto{ width: 2em;}
+
+.inp:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.inp:focus {
+    background-color: white;
+    /* width: 300px; */
+    color: var(--red-color);
+}
+
+.label{
+    font-size: 28px;
+    margin: 2px;
+}
+
+.languge-custom{
+  border: 1px solid black; margin: 10px;
+}
+
+.languge-custom-wrap{
+  display:flex; justify-content: center;
+}
+
+/* #add-lang{
+  display:block; width: 100%; height: 30px;
+}
+#add-riddle{
+  display:block; width: 100%; height: 30px;
+}
+
+#save-form{
+  display:block; width: 100%; height: 30px;
+} */
+
+body{
+    text-align: center;
+    color: black;
+    background: linear-gradient(to top right, var(--main-bg-color) 20%, var(--second-bg-color) 100%);
+}
+
+.container {
+    border: 1px solid black;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.box {
+    margin: 10px;
+    display: flex;
+}
+
+
+
+.element {
+    /* border: 1px solid black; */
+    flex-grow: 1;
+    margin: 10px;
+}
+
+.riddle-settings {
+    /* border: 1px solid black; */
+    margin: 10px;
+}
+.riddle-sound {
+    /* border: 1px solid black; */
+    margin: 10px;
+    display: flex;
+	flex-direction: column;
+	min-height: 100%;
+}
+
+
+.riddle-fotter {
+    /* border: 1px solid black; */
+    margin: 10px;
+}
+.riddle-body {
+    /* border: 1px solid black; */
+    margin: 10px;
+}
+.riddle-table {
+    /* border: 1px solid black; */
+    margin: 10px;
+}
+
+/* th {border: 1px solid grey;} */
+/* границы ячеек тела таблицы */
+/* td {border: 1px solid grey;} */
+
+
+
+.input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: 0;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.2);
+    /* width: 250px; */
+    border-radius: 3px;
+    /* padding: 10px 15px; */
+    margin: 0 auto 0 auto;
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    color: var(--main-bg-color);
+    -webkit-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+    font-weight: 300;
+}
+
+.input:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.input:focus {
+    background-color: white;
+    /* width: 300px; */
+    color: var(--red-color);
+}
+
+.form-btns {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: 0;
+    background-color: var(--second-bg-color);
+    color: white;
+
+    border: 0;
+    padding: 10px 15px;
+    border-radius: 3px;
+    width: 250px;
+    cursor: pointer;
+    font-size: 18px;
+    -webkit-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
+
+.form-btns:hover {
+    background-color: var(--second-bg-color);
+    color: white;
+    background-color: white;
+    color: var(--main-bg-color);
+}
+
+
+
+.selectdiv {
+  float: left;
+  min-width: 100px;
+}
+
+/* IE11 hide native button (thanks Matt!) */
+select::-ms-expand {
+display: none;
+}
+
+/* .selectdiv:after { */
+/*   content: '<>'; */
+/*   /\* font: 17px "Consolas", monospace; *\/ */
+/*   color: #333; */
+/*   -webkit-transform: rotate(90deg); */
+/*   -moz-transform: rotate(90deg); */
+/*   -ms-transform: rotate(90deg); */
+/*   transform: rotate(90deg); */
+/*   right: 11px; */
+/*   /\*Adjust for position however you want*\/ */
+  
+/*   top: 18px; */
+/*   padding: 0 0 2px; */
+/*   border-bottom: 1px solid #999; */
+/*   /\*left line *\/ */
+  
+/*   position: absolute; */
+/*   pointer-events: none; */
+/* } */
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* Add some styling */
+
+  /* display: block; */
+  width: 10em;
+  text-align: center;
+  height: 25px;
+  /* float: right; */
+  /* margin: 5px 0px; */
+  /* padding: 0px 24px; */
+  font-size: 16px;
+  /* line-height: 1.75; */
+  color:  var(--main-bg-color);
+  background-color:  rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  background-image: none;
+  /* border: 1px solid #cccccc; */
+  -ms-word-break: normal;
+  word-break: normal;
+}
+
+
+#btnSave{
+    /* color: var(--red-color); */
+    background: var(--green-color-l);
+}
+#btnReport{
+    /* color: var(--red-color); */
+    background: var(--blue-color-l);
+}

@@ -1,0 +1,311 @@
+
+body{
+    text-align: center;
+    color: black;
+    background: linear-gradient(to top right, var(--main-bg-color) 20%, var(--second-bg-color) 100%);
+}
+
+.container {
+    /* border: 1px solid black;  */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.riddle-body{
+  /* border: 1px solid black; */
+  border-radius:  40px;
+  font-size: 40px;
+  margin: 20px;
+  box-shadow: 5px 5px 30px 7px rgba(0, 0, 0, 0.25),
+    -5px -5px 30px 7px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+
+.riddle-type{
+  /* border: 1px solid black; */
+  border-radius:  40px;
+  font-size: 40px;
+  margin: 20px;
+  box-shadow: 5px 5px 30px 7px rgba(0, 0, 0, 0.25),
+    -5px -5px 30px 7px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+
+.sound-type{
+  /* border: 1px solid black; */
+  border-radius:  40px;
+  font-size: 40px;
+  margin: 20px;
+  box-shadow: 5px 5px 30px 7px rgba(0, 0, 0, 0.25),
+    -5px -5px 30px 7px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+
+.riddle-body:hover {
+  /* transform: scale(1.1, 1.1); */
+  box-shadow: 5px 5px 30px 15px rgba(0, 0, 0, 0.25),
+    -5px -5px 30px 15px rgba(0, 0, 0, 0.22);
+}
+
+
+.riddle-sound {
+    /* border: 1px solid black; */
+  border-radius:  40px;
+  font-size: 40px;
+    display: flex;
+  flex-direction: column;
+  align-content: space-between;
+  min-height: 100%;
+  margin: 20px;
+  box-shadow: 5px 5px 30px 7px rgba(0, 0, 0, 0.25),
+    -5px -5px 30px 7px rgba(0, 0, 0, 0.22);
+}
+
+.riddle-sound:hover {
+  /* transform: scale(1.1, 1.1); */
+  box-shadow: 5px 5px 30px 15px rgba(0, 0, 0, 0.25),
+    -5px -5px 30px 15px rgba(0, 0, 0, 0.22);
+}
+
+/* vishe v util */
+/* #audio0{ */
+/*     width: 60%; */
+/*     min-width: 500px; */
+/*     height: auto; */
+/*     padding: 5px; */
+/*     border-radius: 20px; */
+/*     /\* background-color: #eee; *\/ */
+/*     color: #444; */
+/*     margin: 20px auto; */
+/*     overflow: hidden; */
+/* } */
+
+.riddle-player {
+    /* border: 1px solid black; */
+    border-radius:  40px;
+    font-size: 40px;
+    /* display: flex; */
+    flex-direction: column;
+    align-content: space-between;
+    /* min-height: 100%; */
+    margin: 20px;
+    box-shadow: 5px 5px 30px 7px rgba(0, 0, 0, 0.25),
+                -5px -5px 30px 7px rgba(0, 0, 0, 0.22);
+}
+
+#btnReset{
+    /* color: var(--red-color); */
+    background: var(--red-color-l);
+}
+
+.riddle-player:hover {
+    /* transform: scale(1.1, 1.1); */
+    box-shadow: 5px 5px 30px 15px rgba(0, 0, 0, 0.25),
+                -5px -5px 30px 15px rgba(0, 0, 0, 0.22);
+}
+
+.container1 {
+    /* border: 1px solid black;  */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#audio1{
+    width:304px;
+}
+
+#npTitle{
+    display: block;
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    margin: 10px auto;
+}
+
+audio::-webkit-media-controls-panel{
+    background-color: rgb(255, 0, 0);
+}
+audio {
+    background-color: rgba(255, 0, 0, 0.9);
+}
+#select-sound-button{
+    /* background-color: var(--red-color-l); */
+
+    /* background-color: rgb(255, 0, 0); */
+    background-color: rgba(255, 0, 0, 0.1);
+    width:100px; 
+    /* width: 0em; */
+    text-transform: uppercase;
+    color: white;
+    font-size: 30px;
+}
+#select-sound-button:hover{
+    background-color: rgba(255, 0, 0, 1);
+}
+
+/* Player */
+ul {
+  width: 10em;
+  text-align: center;
+  /* background: rgba(0, 204, 255, 0.1); */
+  flex: 1 0 auto;
+}
+
+ul li {
+  display: block;
+}
+
+ul li a {
+  padding: 5px;
+  color: white;
+  font-size: 25px;
+  text-decoration: none;
+  display: block;
+}
+
+ul li div {
+  padding: 5px;
+  color: white;
+  font-size: 25px;
+  text-decoration: none;
+  display: block;
+}
+
+ul li a:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1),
+    inset 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(0, 35, 122, 0.7);
+}
+ul li div:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1),
+    inset 0 0 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(0, 35, 122, 0.7);
+}
+
+/* #btnShow:selected{ */
+/*     background-color: red; */
+/* } */
+
+#myDrop1{
+    /* height: 500px; */
+    /* width: 150px; */
+    border: 1px solid black;
+    border-radius: 25px;
+    margin: 3px;
+    border: 1px solid black;
+    margin: 10px;
+    flex: 0 1 auto;
+}
+
+.dropzone{
+  font-size: 20px;
+}
+
+
+.sound-text{
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+.drop-zone{
+    /* height: 500px; */
+    /* width: 70%; */
+    border: 55px solid black;
+    border-radius: 35px; 
+    margin: 3px;
+    border: 1px solid black;
+    margin: 10px;
+
+    margin-top: auto;
+}
+
+.dz-button{
+  padding: 0px;
+  margin: 0px;
+}
+
+/*
+.dropzone .dz-preview .dz-image {
+  width: 50px;
+  height: 50px;
+} */
+
+.item-sound-lang{
+  /* display: block; */
+  /* text-align: center; */
+  /* text-align: left; */
+  font-size: 25px;
+  width: 2em;
+  /* background-color: rgb(128, 4, 0); */
+  /* border: 1px solid black;
+  border-radius: 20px; */
+}
+.item-sound-name{
+  /* display: block; */
+  /* text-align: right; */
+  text-align: center;
+  font-size: 25px;
+  width: 100%;
+}
+
+.sound-item-form{
+  display: flex;
+  flex-direction: row;
+}
+
+.wrap_lang{
+  margin: 30px;
+}
+
+.text-i {
+  /* background-image: url("/static/img/line.png"); */
+  color: aquamarine;
+  margin: 20px 0 0 0;
+  cursor: 	default;
+  font-style: italic;
+}
+
+.sound-item{
+  cursor: pointer;
+}
+
+#mySelect{
+    padding: 4px;
+    background-color: red;
+    color: rgb(255, 255, 255);
+    font-size: 23px;
+    text-decoration: none;
+    text-align: center;
+    width: 100%;
+    text-indent: 7em;
+}
+
+.riddle-sound{
+    border-radius:  40px;
+  font-size: 40px;
+  margin: 20px;
+  box-shadow: 5px 5px 30px 7px rgba(0, 0, 0, 0.25),
+    -5px -5px 30px 7px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  width: 10em;
+}
+
+.riddle-list{
+  margin-top: 8px;
+}
+.sound-type-item {
+    font-size: 50px;
+    margin: 5px 0 5px 0;
+  }
+
+.drop-zone {
+    padding: 0 0;
+}
+
+.dropzone {
+    min-height: 50px;
+    background: white;
+    padding: 0px 0px;
+}

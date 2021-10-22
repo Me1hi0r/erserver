@@ -1,0 +1,228 @@
+*{
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+*,*:before,*:after{
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+:focus,:active{outline: none;}
+a:focus,a:active{outline: none;}
+
+nav,footer,header,aside{display: block;}
+
+html,body{
+	height: 100%;
+	width: 100%;
+	font-size: 100%;
+	line-height: 1;
+	font-size: 14px;
+
+  /* font-smooth: auto; */
+	-ms-text-size-adjust: 100%;
+	/* -moz-text-size-adjust: 100%; */
+	/* -webkit-text-size-adjust: 100%; */
+}
+input,button,textarea{
+    font-family:inherit;
+    width: 80px;
+}
+
+/* input::-ms-clear{display: none;} */
+button{cursor: pointer;}
+button::-moz-focus-inner {padding:0;border:0;}
+a, a:visited{text-decoration: none;}
+a:hover{text-decoration: none;}
+ul li{list-style: none;}
+img{vertical-align: top;}
+
+h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight: 400;}
+
+/* font */
+
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-style: normal;
+    font-weight: 200;
+    src: local('Source Sans Pro ExtraLight'), local('SourceSansPro-ExtraLight'), url('/static/Source-Sans-Pro-ExtraLight.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-style: normal;
+    font-weight: 300;
+    src: local('Source Sans Pro Light'), local('SourceSansPro-Light'), url('/static/Source-Sans-Pro-Light.ttf') format('truetype');
+}
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    color: white;
+    font-weight: 300;
+}
+
+body ::-webkit-input-placeholder {
+    /* WebKit browsers */
+    font-family: 'Source Sans Pro', sans-serif;
+    color: white;
+    font-weight: 300;
+}
+
+body ::-moz-placeholder {
+    /* Mozilla Firefox 19+ */
+    font-family: 'Source Sans Pro', sans-serif;
+    color: white;
+    opacity: 1;
+    font-weight: 300;
+}
+
+
+
+/* color */
+:root {
+    --main-bg-color: #7300bd;
+    --second-bg-color: #FF9100;
+    --green-color-l: #00ff0d8a;
+    --green-color: #00FF0D;
+    --yellow-color: #E8DB0C;
+    --red-color: #E8130C;
+    --red-color-l: #e8130c80;
+    --blue-color: #0B54D4;
+    --blue-color-l: #0b55d485;
+    --alpha: 0.1;
+    --red-color-dob:#D4120B;
+    --green-color-dob:#0AC987;
+}
+
+
+
+/* navbar */
+nav {
+    mask-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        #ffffff 25%,
+        #ffffff 75%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    margin: 0 auto;
+    /* padding: 60px 0; */
+}
+
+nav ul {
+    width: 100vw;
+    text-align: center;
+    background: rgba(0, 204, 255, 0.1);
+}
+
+nav ul li {
+    display: inline-block;
+    
+}
+
+nav ul li a {
+    padding: 18px;
+    text-transform: uppercase;
+    color: white;
+    font-size: 30px;
+    text-decoration: none;
+    display: block;
+    
+}
+
+nav ul li a:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1),
+                inset 0 0 1px rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(0, 35, 122, 0.7);
+}
+
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Source Sans Pro' , sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+  margin: 0;
+  min-height: 1vh;
+}
+
+.btn {
+  background-color: var(--main-bg-color);
+  border: none;
+  color: white;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  padding: 1vw;
+  transition: transform 0.7s ease-in-out;
+}
+
+.btn.active {
+  transform: translateY(3vh);
+}
+
+.nav {
+  background-color: var(--second-bg-color);
+  position: fixed;
+  top: 0px;
+  width: 100vw;
+  padding: 0.5vw;
+  transform: translateY(-100%);
+  transition: transform 0.7s ease-in-out;
+  text-align: center;
+  display:flex;
+  justify-content: center;
+}
+
+.nav.active {
+  transform: translateY(0);
+}
+
+.nav ul {
+    padding: 0;
+    list-style-type: none;
+    margin: 0;
+    
+}
+
+.nav ul li {
+  padding: 1rem 0;
+
+}
+
+.nav a {
+  /* margin-right: 2vw;
+  color: white;
+  text-decoration: none; */
+   -webkit-appearance: none;
+    -moz-appearance: none;
+    display: block;
+    appearance: none;
+    outline: 0;
+    background-color: var(--second-bg-color);
+    color: white;
+
+    border: 0;
+    padding: 10px 15px;
+    border-radius: 3px;
+    margin: 0 10px 0 10px;
+    width: 150px;
+    cursor: pointer;
+    font-size: 18px;
+    -webkit-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+} 
+.nav a:hover {
+  /* background-color: aqua;
+  color: rgb(148, 17, 17);
+  text-decoration: none; */
+      background-color: var(--second-bg-color);
+    color: white;
+    background-color: white;
+    color: var(--main-bg-color);
+    /* width: 200px; */
+} 
+
