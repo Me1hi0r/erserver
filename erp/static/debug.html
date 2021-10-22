@@ -26,15 +26,38 @@
 
         <br>
         <h5>sync player:</h5>
-        <br>
         <input id="action_pay" placeholder="1-260"></body>
         <button onclick="pub(val('action_pay'),'/er/music/play')">action play</button>
 
         <br>
-        <input id="action_pay" placeholder="1-260"></body>
-        <button onclick="pub(val('action_pay'),'/er/music/play')">action play</button>
+        <button onclick="pub('','/er/music/stop')">action pause</button>
 
+        <br>
+        <input id="back_play" placeholder="1-260"></body>
 
+        <button onclick="pub(val('back_play'),'/er/musicback/play')">back play</button>
+
+        <br>
+        <button onclick="pub('','/er/musicback/stop')">back pause</button>
+        <br>
+
+        <h5>set volume:</h5>
+
+        <input type="range" min="0" max="100" id="act_vol"></body>
+        <button onclick="pub(val('act_vol'),'/er/mc1/vol/set')">set action vol</button>
+
+        <br>
+
+        <input type="range" min="0" max="100" id="back_vol" ></body>
+        <button onclick="pub(val('back_vol'),'/er/mc2/vol/set')">set background vol</button>
+
+        <br>
+
+        <input type="range" min="0" max="100" id="async_vol" ></body>
+        <button onclick="pub(val('async_vol'),'/er/async/vol/set')">set async vol</button>
+
+        <br>
+        <div>TODO: need separete vol sound settings</div>
 
 
 
@@ -44,41 +67,24 @@
          var MQTT_PORT = 8080;
          var clientId = "id_" + parseInt(Math.random() * 1000, 10);
          var client = new Messaging.Client(MQTT_ADDR, MQTT_PORT, clientId);
+
          var options = {
              timeout: 3,
-             onSuccess: () => {
-                 console.log(
-                     "MQTT: Connected: " + MQTT_ADDR + ":" + MQTT_PORT + ", id: " + clientId
-                 );
-                 /* topic.forEach((e) => {
-                  *     mqtt_subscribe(e);
-                  *     // console.log("MQTT: Subscribed: " + e);
-                  * }); */
-             },
-             onFailure: (message) => {
-                 console.log(
-                     "Error: MQTT: Connection: " +
-                     MQTT_ADDR +
-                     ":" +
-                     MQTT_PORT +
-                     ": " +
-                     message.errorMessage
-                 );
-             },
-         };
+             onSuccess: () => {console.log("MQTT Connect");},
+             onFailure: (message) => {console.log("Error: " + message.errorMessage);}};
 
          client.connect(options);
-         function val(name){
-             let elem = document.getElementById(name);
-             return elem.value;
-         }
          function pub(payload, topic, _qos) {
              if (typeof _qos == "undefined") _qos = 2;
              var message = new Messaging.Message(payload);
              message.destinationName = topic;
              message.qos = _qos;
              client.send(message);
-}
+         }
+         function val(name){
+             let elem = document.getElementById(name);
+             return elem.value;
+         }
         </script>
     </body>
 </html>
