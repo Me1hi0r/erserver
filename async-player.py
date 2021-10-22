@@ -16,7 +16,10 @@ from mplayer import *
 MQTT_PORT = 1883
 MQTT_HOST = "192.168.10.1"
 MEDIA_PATH =  "erp/media"
+DEFAULT_BACK = 'back/001_back.mp3'
+DEFAULT_SYSTEM = 'system/001_welcome.mp3'
 LOGGING_PATH = "erserver.log"
+
 LOGGING_LVL = logging.INFO
 SUBSCRIBE = [
     "/er/async",
@@ -69,20 +72,18 @@ logging.basicConfig(
 #   LN = languages[quest.selected_language]
 
 def init_music():
-  global back_music, back_player, action_player, players, LN, VOL
-  quest = load_current_quest()
-  languages = quest.languages.split(',')
-  VOL = quest.main_vol
-  LN = languages[quest.selected_language]
-
-  back_player = PlayerDecorator(join(getcwd(), MEDIA_PATH, 'back', '001_back.mp3'))
-  action_player = PlayerDecorator(join(getcwd(), MEDIA_PATH, 'system', '001_welcome.mp3'))
-  players = []
-  print("MUSIC/Initiate:")
-  action_player.resume()
-  #todo: fix exit script
-  while True:
-    pass
+    global back_music, back_player, action_player, players, LN, VOL
+    quest = load_current_quest()
+    languages = quest.languages.split(',')
+    players = []
+    VOL = quest.main_vol
+    LN = languages[quest.selected_language]
+    back_player = PlayerDecorator(join(getcwd(), MEDIA_PATH, DEFAULT_BACK))
+    action_player = PlayerDecorator(join(getcwd(), MEDIA_PATH, DEFAULT_SYSTEM))
+    action_player.resume()
+    logging.info(f"player -> initiate")
+    while True:
+        pass
 
 
 
@@ -113,93 +114,93 @@ def mqtt_init(topics):
 
 
 def manage_music(topic, arr):
-  global players, action_player, back_player, LN
-  if topic == "/er/async" and arr == 'reset':
-    print('reset')
-    quest = load_current_quest()
-    languages = quest.languages.split(',')
-    LN = languages[quest.selected_language]
-    for i in range(len(players)):
-      del players[i]
-    players = []
+    global players, action_player, back_player, LN
+    if topic == "/er/async" and arr == 'reset':
+        print('reset')
+        quest = load_current_quest()
+        languages = quest.languages.split(',')
+        LN = languages[quest.selected_language]
+        for i in range(len(players)):
+            del players[i]
+        players = []
 
 
-  if topic == "/er/async/hint/play":
-    path = join(getcwd(), MEDIA_PATH, 'hint')
-    print(path)
-    sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
-    print(sound_name)
-    for i in range(len(players)):
-      if not players[i].is_alive():
-        del players[i]
-    print(path+sound_name)
+    if topic == "/er/async/hint/play":
+        path = join(getcwd(), MEDIA_PATH, 'hint')
+        print(path)
+        sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
+        print(sound_name)
+        for i in range(len(players)):
+            if not players[i].is_alive():
+                del players[i]
+        # print(path+sound_name)
 
-    new_player = AsyncPlayerDecorator(join(path,sound_name))
-    new_player.resume()
-    players.append(new_player)
+        new_player = AsyncPlayerDecorator(join(path,sound_name))
+        new_player.resume()
+        players.append(new_player)
 
-  if topic == "/er/async/auto/play":
-    path = join(getcwd(), MEDIA_PATH, 'auto')
+    if topic == "/er/async/auto/play":
+        path = join(getcwd(), MEDIA_PATH, 'auto')
 
-    arr = arr if len(arr) == 3 else '0' + arr
-    sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
-    for i in range(len(players)):
-      if not players[i].is_alive():
-        del players[i]
+        arr = arr if len(arr) == 3 else '0' + arr
+        sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
+        for i in range(len(players)):
+            if not players[i].is_alive():
+                del players[i]
 
-    new_player = AsyncPlayerDecorator(join(path,sound_name))
-    new_player.resume()
-    players.append(new_player)
+        new_player = AsyncPlayerDecorator(join(path,sound_name))
+        new_player.resume()
+        players.append(new_player)
 
-  if topic == "/er/async/play":
-    for i in range(len(players)):
-      if not players[i].is_alive():
-        del players[i]
-    new_player = AsyncPlayerDecorator(join(getcwd(), MEDIA_PATH, arr))
-    new_player.resume()
-    players.append(new_player)
+    if topic == "/er/async/play":
+        for i in range(len(players)):
+            if not players[i].is_alive():
+                del players[i]
+        new_player = AsyncPlayerDecorator(join(getcwd(), MEDIA_PATH, arr))
+        new_player.resume()
+        players.append(new_player)
 
 
-  if topic == "/er/async/stop":
-    for player in players:
-      player.pause()
-    players = []
+    if topic == "/er/async/stop":
+        for player in players:
+            player.pause()
+        players = []
 
-  if topic == "/er/music/play":
-    arr = arr if len(arr) == 3 else '0' + arr
-    path = join(getcwd(), MEDIA_PATH, 'system')
-    print(path)
-    # sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
-    sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))
-    print(sound_name)
-    action_player.load(join(path,sound_name))
+    if topic == "/er/music/play":
+        arr = arr if len(arr) == 3 else '0' + arr
+        path = join(getcwd(), MEDIA_PATH, 'system')
+        print(path)
+        # sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))[0]
+        sound_name = list(filter(lambda s:s.startswith(f'|{arr}|{LN}|'), os.listdir(path)))
+        print(sound_name)
+        action_player.load(join(path,sound_name))
 
-  if topic == "/er/music/stop":
-    action_player.pause()
+    if topic == "/er/music/stop":
+        action_player.pause()
 
-  if topic == "/er/musicback/play":
-    back_player.resume()
+    if topic == "/er/musicback/play":
+        back_player.resume()
 
-  if topic == "/er/musicback/stop":
-    back_player.pause()
+    if topic == "/er/musicback/stop":
+        back_player.pause()
 
-  if topic == "/er/mc1/pause":
-    action_player.pause()
+    if topic == "/er/mc1/pause":
+        action_player.pause()
 
-  if topic == "/er/mc1/resume":
-    action_player.resume()
+    if topic == "/er/mc1/resume":
+        action_player.resume()
 
-  if topic == "/er/mc1/vol/set":
-    action_player.set_volume(int(arr))
+    if topic == "/er/mc1/vol/set":
+        action_player.set_volume(int(arr))
 
-  if topic == "/er/mc2/vol/set":
-    back_player.set_volume(int(arr))
+    if topic == "/er/mc2/vol/set":
+        back_player.set_volume(int(arr))
 
-  if topic == "/er/mc2/pause":
-    back_player.pause()
+    if topic == "/er/mc2/pause":
+        back_player.pause()
 
-  if topic == "/er/mc2/resume":
-    back_player.resume()
+    if topic == "/er/mc2/resume":
+        back_player.resume()
 
 
 
