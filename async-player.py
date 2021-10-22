@@ -122,6 +122,19 @@ def mqtt_init(topics):
     client.on_message = on_message
     client.on_disconnect = on_disconnect
 
+def find_sound(path, ln, numb):
+    sound = list(filter(
+        lambda s:s.startswith(f'|{numb}|{ln}|'),
+        os.listdir(path)))
+    if len(sound) == 1:
+        logging.info(f"player -> find sound {sound[0]}")
+        return sound[0]
+    if len(soudn) > 1:
+        logging.warning(f"player -> find {len(names)} sound files: {names}")
+        return sound[0]
+    if len(sound) == 0:
+        logging.warning(f"player -> dont find sound files with {numb} and {ln}")
+        #todo add return
 
 def manage_music(topic, arr):
     global players, action_player, back_player, LN
