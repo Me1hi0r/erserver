@@ -16,8 +16,11 @@ from mplayer import *
 MQTT_PORT = 1883
 MQTT_HOST = "192.168.10.1"
 MEDIA_PATH =  "erp/media"
-DEFAULT_BACK = 'back/001_back.mp3'
-DEFAULT_SYSTEM = 'system/001_welcome.mp3'
+BACK_PATH = join(getcwd(), MEDIA_PATH, "back/")
+SYSTEM_PATH = join(getcwd(), MEDIA_PATH,"system/")
+HINT_PATH = join(getcwd(), MEDIA_PATH, "hint/")
+DEFAULT_BACK = '001_back.mp3'
+DEFAULT_SYSTEM = '001_welcome.mp3'
 LOGGING_PATH = "erserver.log"
 
 LOGGING_LVL = logging.INFO
@@ -74,17 +77,17 @@ logging.basicConfig(
 def init_music():
     global back_music, back_player, action_player, players, LN, VOL
     quest = load_current_quest()
-    languages = quest.languages.split(',')
-    players = []
     VOL = quest.main_vol
+    languages = quest.languages.split(',')
     LN = languages[quest.selected_language]
-    back_player = PlayerDecorator(join(getcwd(), MEDIA_PATH, DEFAULT_BACK))
-    action_player = PlayerDecorator(join(getcwd(), MEDIA_PATH, DEFAULT_SYSTEM))
-    action_player.resume()
+    players = []
     logging.info(f"player -> initiate")
+    back_player = PlayerDecorator(BACK_PATH + DEFAULT_BACK)
+    action_player = PlayerDecorator(SYSTEM_PATH + DEFAULT_SYSTEM)
+    action_player.resume()
+    logging.info(f"player/action -> welcome sound")
     while True:
         pass
-
 
 
 def mqtt_init(topics):
@@ -116,13 +119,13 @@ def mqtt_init(topics):
 def manage_music(topic, arr):
     global players, action_player, back_player, LN
     if topic == "/er/async" and arr == 'reset':
-        print('reset')
         quest = load_current_quest()
         languages = quest.languages.split(',')
         LN = languages[quest.selected_language]
         for i in range(len(players)):
             del players[i]
         players = []
+        logging.info(f"player/async -> reset")
 
 
     if topic == "/er/async/hint/play":
@@ -291,4 +294,5 @@ class AsyncPlayerDecorator:
 
 mqtt_init(SUBSCRIBE)
 mqtt_routine(MQTT_HOST, MQTT_PORT)
+sleep(.1)
 init_music()
