@@ -1,16 +1,18 @@
 import os
 import django
-from os import getcwd
-from os.path import join
-from time import sleep
 import paho.mqtt.client as mqtt
 import threading
 import logging
 
+from os import getcwd
+from os.path import join
+from time import sleep
+from mplayer import *
+
+#neccessary for load data from model
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ers.settings")
 django.setup()
 from erp.tools import load_current_quest
-from mplayer import *
 
 #confign
 MQTT_PORT = 1883
@@ -42,8 +44,8 @@ LOGGING_LVL = logging.INFO
 #paths
 MEDIA_PATH =  "erp/media"
 HINT_PATH = join(getcwd(), MEDIA_PATH, "hint/")
-AUTO_PATH = join(getcwd(), MEDIA_PATH, "hint_auto/")
 ACTION_PATH = join(getcwd(), MEDIA_PATH,"action/")
+AUTO_PATH = join(getcwd(), MEDIA_PATH, "hint_auto/")
 BACK_PATH = join(getcwd(), MEDIA_PATH, "background/")
 DEFAULT_PATH = join(getcwd(), MEDIA_PATH, "default/")
 
@@ -75,17 +77,17 @@ def load_vol():
     return quest.main_vol
 
 
-def sound_path(path, ln, numb):
+def get_sound_path(path, ln, numb):
     # type check
     try:
         int(numb)
     except ValueError:
-        logging.error(f"player -> wrong sound number {numb}, number set 001")
+        logging.error(f"player -> wrong sound number {numb} -> number set 001")
         numb = '001'
 
     # range check
     if int(numb) < 1 or int(numb) > 260:
-        logging.warning(f"player -> wrong sound number {numb}, number set 001")
+        logging.warning(f"player -> wrong sound number (1 <= x <= 260) {numb} -> number set 001")
         numb = '001'
 
     # len check
@@ -113,7 +115,7 @@ def sound_path(path, ln, numb):
 
 def create_player(path, sound_numb, is_async):
     global players, LN
-    class PlayerDecorator:
+    class Player:
         def __init__(self, song_path, is_async):
             self._is_paused = False if is_async else True
             self._player = Player()
@@ -147,7 +149,7 @@ def create_player(path, sound_numb, is_async):
             self._player.quit()
 
     if is_async:
-        new_player = PlayerDecorator(sound_path(path, LN, sound_numb), is_async=True)
+        new_player = Player(get_sound_path(path, LN, sound_numb), is_async=True)
         new_player.resume()
 
         #drop dead players
@@ -157,7 +159,7 @@ def create_player(path, sound_numb, is_async):
 
         players.append(new_player)
     else:
-        return PlayerDecorator(sound_path(path, LN, sound_numb), is_async=False)
+        return Player(get_sound_path(path, LN, sound_numb), is_async=False)
 
 
 def init_music():
@@ -226,7 +228,7 @@ def manage_music(topic, arr):
         logging.info(f"player/async -> reset")
 
     if topic == "/er/music/play":
-        action_player.load(sound_path(ACTION_PATH, LN, arr))
+        action_player.load(get_sound_path(ACTION_PATH, LN, arr))
         logging.info(f"player/action -> play")
 
     if topic == "/er/music/stop" or topic == "/er/mc1/pause":
@@ -237,7 +239,7 @@ def manage_music(topic, arr):
         action_player.resume()
 
     if topic == "/er/musicback/play":
-        back_player.load(sound_path(BACK_PATH, LN, arr))
+        back_player.load(get_sound_path(BACK_PATH, LN, arr))
         logging.info(f"player/back -> play")
 
     if  topic == "/er/mc2/resume":
