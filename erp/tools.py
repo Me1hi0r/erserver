@@ -31,6 +31,33 @@ def set_current_quest(name):
     panel.save()
 
 
+
+def sorted_riddles():
+    q = load_current_quest()
+    quest_riddles = q.riddel_set.all()
+    return sorted(quest_riddles, key=lambda riddle: riddle.panel_order)
+
+def quest_languages():
+    q = load_current_quest()
+    return q.languages.split(',')
+
+def only_langs_sound(sound_type):
+    return list(filter(lambda s:s.startswith('|'), os.listdir(sound_type)))
+
+def only_base_sound(sound_type):
+    return list(filter(lambda s: not s.startswith('|'), os.listdir(sound_type)))
+
+
+def load_langs():
+    q = load_current_quest()
+    return q.languages.split(',')
+
+def load_select_lang():
+    q = load_current_quest()
+    languages = q.languages.split(',')
+    return languages[q.selected_language]
+
+
 #+++++++MAIL
 def obj_to_xlsx():
     stat = Statistic.objects.all()
