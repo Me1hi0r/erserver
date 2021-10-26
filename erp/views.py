@@ -1,22 +1,29 @@
+import os
+import json
+import logging
+import operator
+from functools import reduce
+# from os.sound_folder import join
+from shutil import copy2, copyfile
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
-
-from shutil import copy2, copyfile
+from ers.settings import BASE_DIR, MEDIA_ROOT, DEFAULT_DIR,os
 from erp.models import Panel, Statistic, Quest, Riddel
 from erp.tools import for_each, send_mail, load_current_quest, set_current_quest
-from ers.settings import BASE_DIR, os
+from erp.tools import sorted_riddles, quest_languages, only_langs_sound
+from erp.tools import only_base_sound, load_langs, load_select_lang
 
-import os
-from os.path import join
-import json
+
 
 def log_in(request):
     if request.user.is_authenticated:
+        logging.info(f"panel -> user {request.user} is authenticated")
         return HttpResponseRedirect("/panel")
+    logging.info(f"panel -> user {request.user} is not authenticated")
     return render(request, "login.html", {})
 
 def authentification(request, action):
@@ -30,34 +37,37 @@ def authentification(request, action):
         user = authenticate(request, username=data['name'], password=data['pass'])
         if user is not None:
             login(request, user)
+            logging.info(f"panel -> user {user} is authenticated and login")
             return JsonResponse({'status': 'user-authentification'})
         else:
+            logging.info(f"panel -> user {user} not exist")
             return JsonResponse({'status': 'user-not-exist'})
 
 @login_required()
-def panel(request):
-    q = load_current_quest()
-    quest_riddles = q.riddel_set.all()
-    sorted_rid = sorted(quest_riddles, key=lambda r: r.panel_order)
+def debug(request):
+    return render(request, "debug.html", {})
 
+@login_required()
+def panel(request):
     return render(request, "panel.html", {
-        # 'quest_riddles': quest_riddles,
-        'quest_riddles': sorted_rid,
+        'quest_riddles': sorted_riddles()
     })
 
+@login_required()
+def sound(request):
+    return render(request, "sound.html", {
+        'quest_riddles': sorted_riddles()
+    })
 
 @login_required()
 def config(request, action=''):
     if request.method == 'GET':
         q = load_current_quest()
-        quest_riddels = q.riddel_set.all()
-        sorted_rid = sorted(quest_riddels, key=lambda r: r.panel_order)
         all_other_quest = Quest.objects.all().exclude(name=q.name)
-        separate_languages = q.languages.split(",")
 
         return render(request, "config.html", {
             'quest_name': q.name,
-            'quest_riddles': sorted_rid,
+            'quest_riddles': sorted_riddles(),
             'all_other_quest': all_other_quest,
             'playing_time': q.playing_time,
             'start_offset': q.start_offset,
@@ -72,22 +82,24 @@ def config(request, action=''):
             'show_start_offset': q.show_start_offset,
             'languages': q.languages,
             'selected_language': q.selected_language,
-            'separate_languages': separate_languages})
+            'separate_languages': load_langs()})
 
     if request.method == 'POST' and action == 'new':
         name = request.POST.get('new-quest-name')
         new_quest = Quest.objects.create(name=name)
         new_quest.save()
         set_current_quest(name)
+        logging.info(f"panel/config -> create new configuration of quest {name} and set it")
         return HttpResponseRedirect("/config")
 
     if request.method == 'POST' and action == 'load':
         name = request.POST.get('load-quest-name')
         set_current_quest(name)
+        logging.info(f"panel/config -> load configuration of quest {name}")
         return HttpResponseRedirect("/config")
 
     if request.method == 'POST' and action == 'save':
-        # update quest
+        # update all changes in quest
         q = load_current_quest()
         q.show_autohints = bool(request.POST.get('show_autohints'))
         q.languages = request.POST.get('languages')
@@ -104,7 +116,7 @@ def config(request, action=''):
         q.playing_time = request.POST.get('playing_time')
         q.save()
 
-        # create or/and update all riddels
+        # update all changes in any riddels
         rid_count = int(request.POST.get('rid-count'))
         fields_name = [f.name for f in Riddel._meta.get_fields()]
         rid = dict.fromkeys(fields_name)
@@ -113,172 +125,108 @@ def config(request, action=''):
 
         for key, val in request.POST.items():
             if key.startswith('riddle') and key.find('autoi') != -1:
-                [_, n, f, an] = key.split("-")
-                RIDDELS[int(n)-1][f] += val + ','
+                [_, number, f, an] = key.split("-")
+                RIDDELS[int(number)-1][f] += val + ','
             elif key.startswith('riddle'):
-                [_, n, f] = key.split("-")
-                RIDDELS[int(n)-1][f] = val
+                [_, number, f] = key.split("-")
+                RIDDELS[int(number)-1][f] = val
         for rid in RIDDELS:
-            try:
-                r = q.riddel_set.get(erp_num=int(rid['erpnum']))
-                r.panel_order = int(rid['order'])
-                r.erp_name = rid['id']
-                r.panel_name = rid['name']
-                r.video_hints = rid['video_buttons']
-                old_sound_hints = r.sound_hints
-                r.sound_hints = rid['sound_buttons']
-                old_auto_hints = r.auto_hints
-                r.autoi = rid['autoi'][0:-1] if rid['autoi'] else ''
-                r.auto_hints = rid['auto_buttons']
-                r.save()
+            riddle = q.riddel_set.get(erp_num=int(rid['erpnum']))
+            riddle.panel_order = int(rid['order'])
+            riddle.erp_name = rid['id']
+            riddle.panel_name = rid['name']
+            riddle.video_hints = rid['video_buttons']
+            old_sound_hints = riddle.sound_hints
+            riddle.sound_hints = rid['sound_buttons']
+            old_auto_hints = riddle.auto_hints
+            riddle.autoi = rid['autoi'][0:-1] if rid['autoi'] else ''
+            riddle.auto_hints = rid['auto_buttons']
+            riddle.save()
+            add_or_del_sounds(riddle.sound_hints, old_sound_hints, riddle.erp_num,'hint')
+            add_or_del_sounds(riddle.auto_hints, old_auto_hints, riddle.erp_num,'hint_auto')
+            logging.info(f"panel/config -> update sound hint and auto_hint")
+        logging.info(f"panel/config -> save configuration")
 
-                add_or_del_sounds(r.sound_hints, old_sound_hints, r.erp_num,'hint')
-                add_or_del_sounds(r.auto_hints, old_auto_hints, r.erp_num,'auto')
-
-            except ObjectDoesNotExist:
-                r = Riddel.objects.create(
-                    quest = q,
-                    panel_order = int(rid['order']),
-                    erp_name = rid['id'],
-                    erp_num = int(rid['erpnum']),
-                    panel_name = rid['name'],
-                    sound_hints = rid['sound_buttons'],
-                    video_hints = rid['video_buttons'],
-                    auto_hints = rid['auto_buttons'],
-                    autoi = rid['autoi'][0:-1] if rid['autoi'] else 0
-                    )
-                r.save()
         return HttpResponseRedirect("/config")
 
 @login_required()
-def sound(request):
-    q = load_current_quest()
-    quest_riddles = q.riddel_set.all()
-
-    return render(request, "sound.html", {
-        'quest_riddles': quest_riddles,
-    })
-
 def upload_sound(request):
     if request.method == "POST":
         file = request.FILES["file"]
         sound_type = request.POST["type"]
         old_name = request.POST["old_name"]
 
-        old_track_path = join(BASE_DIR, f'erp/media/{sound_type}/{old_name}')
-        print(old_track_path)
-        os.remove(old_track_path)
+        os.remove(f'{MEDIA_ROOT}{sound_type}/{old_name}')
 
-        prefix = old_name[0:4] if(sound_type == "back" or sound_type == "system") else old_name[0:8]
-        new_name = prefix + file.name.replace(" ", "")
-        new_track_path = join(BASE_DIR, f'erp/media/{sound_type}/{new_name}')
-        print(new_track_path)
-        with open(new_track_path, 'wb+') as destination:
+        new_name = old_name[0:8] + file.name.replace(" ", "")
+        with open(f'{MEDIA_ROOT}{sound_type}/{new_name}', 'wb+') as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
-
+    logging.info(f"panel -> upload sound")
     return HttpResponseRedirect("sound")
 
-
+@login_required()
 def sound_list(request, sound_type, riddle=0):
-    print("LIST")
-
-    q = load_current_quest()
-    languages = q.languages.split(',')
-    current_language = languages[q.selected_language]
-
     if request.method == "GET":
         sound = []
-        for track in os.listdir(f"erp/media/{sound_type}/"):
-            if track.startswith("|"):
-                if (sound_type == "system" or sound_type == "back"):
-                    sound.append(track)
-                if (sound_type == "action" or sound_type == "hint" or sound_type == 'auto'):
-                    _, numb, sound_lang, _ = track.split("|")
-                    sound_numb = int(numb)
-                    if sound_numb >= riddle and sound_numb < riddle+10 and sound_lang == current_language:
-                        sound.append(track)
-        print(sound)
+        for track in only_langs_sound(f'{MEDIA_ROOT}{sound_type}/'):
+            _, numb, sound_lang, _ = track.split("|")
+            numb = int(numb)
+            if numb >= riddle and numb < riddle+10 and sound_lang == load_select_lang():
+                sound.append(track)
+        logging.info(f"panel -> generate sound list")
         return JsonResponse({"sounds": sound})
 
-
-
-
+@login_required()
 def reset_sound(request):
     if request.method == 'POST':
-        manage_all_sound()
+        # print("DELETE ALL LANG SOUND")
+        for sound_type in ['action', 'hint', 'hint_auto', 'background']:
+            type_folder = f'{MEDIA_ROOT}{sound_type}/'
+            langs_sound = only_langs_sound(type_folder)
+            # for sound in not_use_lang_sound_list(langs_sound, load_langs()):
+            for sound in only_langs_sound(type_folder):
+                os.remove(f'{type_folder}{sound}')
+
+        # print("CREATE NEW LANG SOUND")
+        for riddle in sorted_riddles():
+            add_or_del_sounds(riddle.auto_hints, 0, riddle.erp_num, 'hint_auto')
+            add_or_del_sounds(riddle.sound_hints, 0, riddle.erp_num, 'hint')
+
+        for sound_type in ['action', 'background']:
+            for sound in only_base_sound(MEDIA_ROOT + f'{sound_type}/'):
+                number, name = sound.split("_", 1)
+                fr = f'{MEDIA_ROOT}{sound_type}/{sound}'
+                for language in load_langs():
+                    to = f'{MEDIA_ROOT}{sound_type}/|{number}|{language}|{name}'
+                    copyfile(fr, to)
+
+        logging.info(f"panel/sound-managment -> reset all sounds")
         return HttpResponseRedirect("/sound")
 
 
-def add_or_del_sounds(new, old, num, t):
-    new = int(new)
-    old = int(old)
-    num = int(num)
-    q = load_current_quest()
-    path = join(BASE_DIR, f'erp/media/{t}/')
+def add_or_del_sounds(new, old, num, sound_type):
+    new, old, num = list(map(int, [new, old, num]))
     diff = new - old
 
     if(diff > 0):
-        # print('COPY FILES')
-        for c, n in enumerate(range(diff)):
-            n = str(num + n)
-            n = n if len(n) == 3 else '0' + n
-            fr = join(BASE_DIR, f'erp/media/{t}/', n+'.mp3')
-            for ln in q.languages.split(','):
-                copyfile(fr, join(
-                    BASE_DIR,
-                    f'erp/media/{t}/|{n}|{ln}|{t}_{c + old + 1}.mp3'))
+        for i in range(old, new):
+            number = str(num + i)
+            number = number if len(number) == 3 else '0' + number
+            i = str(int(number[2]) + 1)
+            fr = f'{DEFAULT_DIR}{number}.mp3'
+            for ln in quest_languages():
+                to = f'{MEDIA_ROOT}{sound_type}/|{number}|{ln}|{sound_type}_{i}.mp3'
+                copyfile(fr, to)
+        logging.info(f"panel/sound-managment -> copy {diff} stub sound in {sound_type} sound_type")
 
     if(diff < 0):
-        # print('DELETE FILES')
-        for sound in list(filter(lambda s:s.startswith('|'), os.listdir(path))):
-            for n in range(-diff):
-                if str(n + num) in sound:
-                    os.remove(path + sound)
+        for sound in only_langs_sound(MEDIA_ROOT + f'{sound_type}/'):
+            for number in range(new, old):
+                if str(number + num) in sound:
+                    os.remove(MEDIA_ROOT + f'{sound_type}/' + sound)
+        logging.info(f"panel/sound-managment -> delete {-diff} sound in {sound_type} sound_type")
 
-
-
-def manage_all_sound():
-    #TODO: refactor this
-    q = load_current_quest()
-    languages = q.languages.split(',')
-    # current_language = languages[q.selected_language]
-
-    print("DELETE NOT USE LANG SOUND")
-    for t in ['action', 'hint','auto']:
-        path = join(BASE_DIR, f'erp/media/{t}/')
-        all_sounds = os.listdir(path)
-        remove_list = os.listdir(path)
-        for sound_name in all_sounds:
-            if not sound_name.startswith("|"):
-                remove_list.remove(sound_name)
-                for language in languages:
-                    if language in sound_name:
-                        remove_list.remove(sound_name)
-        for sound_name in remove_list:
-            os.remove(path + sound_name)
-
-    print("CREATE NEW LANG SOUND")
-    for t in ['action', 'back', 'system']:
-        path = join(BASE_DIR, f'erp/media/{t}/')
-        sounds = os.listdir(path)
-        for sound in sounds:
-            print(f'{t}/{sound}')
-            if not sound.startswith("|"):
-                number, name = sound.split("_", 1)
-                fr = join(BASE_DIR, f'erp/media/{t}/', sound)
-                if t == 'back' or t == 'system':
-                    to = join(BASE_DIR, f'erp/media/{t}/|{number}|ND|{name}')
-                    copyfile(fr, to)
-                if t == 'action' or t == 'hint':
-                    for language in languages:
-                        to = join(BASE_DIR, f'erp/media/{t}/|{number}|{language}|{name}')
-                        copyfile(fr, to)
-
-    print("CREATE NEW AUTO AND SOUND HINTS")
-    for r in q.riddel_set.all():
-        add_or_del_sounds(r.auto_hints, 0, r.erp_num, 'auto')
-        add_or_del_sounds(r.sound_hints, 0, r.erp_num, 'hint')
 
 #++++++++++++++MAIL++++++++++++++++++++++++++++++++++++
 def report(request):
@@ -305,8 +253,8 @@ def data(request):
             'language': q.selected_language,
             'riddles': {},
         })
-        for n, rid in zip(range(rn), q.riddel_set.all()):
-            json['riddles'][n] = {'strId': rid.erp_name, 'strName': rid.panel_name, 'strStatus':"Not activated", 'number': rid.erp_num, 'sound_buttons': rid.sound_hints, 'video_buttons': rid.video_hints}
+        for number, rid in zip(range(rn), q.riddel_set.all()):
+            json['riddles'][number] = {'strId': rid.erp_name, 'strName': rid.panel_name, 'strStatus':"Not activated", 'number': rid.erp_num, 'sound_buttons': rid.sound_hints, 'video_buttons': rid.video_hints}
         print(json)
     return JsonResponse(json)
 
@@ -326,5 +274,3 @@ def statistic(request, action=''):
             json = {"status": "time up"}
     return JsonResponse(json)
 
-def debug(request):
-    return render(request, "debug.html", {})
