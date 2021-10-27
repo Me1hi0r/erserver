@@ -243,3 +243,8 @@ select {
     /* color: var(--red-color); */
     background: var(--blue-color-l);
 }
+
+#btnReset{
+    /* color: var(--red-color); */
+    background: var(--red-color-l);
+}

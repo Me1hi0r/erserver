@@ -16,10 +16,12 @@
       <ul class="nav-bar-ul">
         <li {% if not user.is_superuser %} style="display: none" {% endif %}><a href="/admin">ADMIN</a></li>
         <li {% if not user.is_superuser %} style="display: none" {% endif %}><a href="/debug">DEBUG</a></li>
+
         <li><a href="/panel">panel</a></li>
         <li><a href="/sound">sounds</a></li>
-        <li><a href="/accounts/logout">out</a></li>
         <li><a href="" id="btnSave">SAVE</a></li>
+        <li><a href="/accounts/logout">out</a></li>
+        <li><a href="/" id="btnReset">RESET SOUND</a></li>
         <!-- <li><a href="/" id="btnReport">report</a></li> -->
       </ul>
     </nav>

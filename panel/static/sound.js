@@ -115,10 +115,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     getSoundList();
   });
 
-  byId("btnReset").addEventListener("click", (e) => {
-    e.preventDefault();
-    byId("main-form").submit();
-  });
   byId("select-sound-button").addEventListener("click", (e) => {
     byId("select-sound-button").hidden = true;
     stype(SHOW);

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.conf.urls.static import static
 
-from erp import views as v
+from panel import views as v
 
 urlpatterns = [
     path('admin/', admin.site.urls),

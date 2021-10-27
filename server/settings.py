@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'erp',
+    'panel',
 ]
 
 MIDDLEWARE = [
@@ -44,12 +44,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'ers.urls'
+ROOT_URLCONF = 'server.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'erp/static')],
+        'DIRS': [os.path.join(BASE_DIR, 'panel/static')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,12 +62,12 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ers.wsgi.application'
+WSGI_APPLICATION = 'server.wsgi.application'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'quest.db.sqlite3'),
     }
 }
 
@@ -119,10 +119,6 @@ DEFAULT_PATH = os.path.join(os.getcwd(), MEDIA_PATH, "default/")
 
 
 USERS = {
-    "owner":"secret_pass",
-    "operator":"onetwotree4",
-    "admin": "istartorpass",
-    "gamemaster": "indestroom",
 }
 
 MQTT_PORT = 1883

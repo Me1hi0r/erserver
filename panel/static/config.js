@@ -184,6 +184,14 @@ document.addEventListener("DOMContentLoaded", (e) => {
     byId("main-form").action = "/config/new";
     byId("main-form").submit();
   });
+  byId("btnReset").addEventListener("click", (e) => {
+    e.preventDefault();
+    alert(
+      "If you push OK button, you delete all custom sound !!! Press close tab if you don't want to delete music"
+    );
+    byId("main-form").action = "/sound/reset";
+    byId("main-form").submit();
+  });
 
   byName("start_offset").addEventListener("input", (e) => {
     let val = e.srcElement.value;

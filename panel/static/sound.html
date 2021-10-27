@@ -16,14 +16,9 @@
     <nav>
       <ul class="nav-bar-ul">
         <li><a href="/config">settings</a></li>
-        <li><a href="/" id="btnReset">RESET SOUND</a></li>
       </ul>
     </nav>
-    <form id="main-form" action="/sound/reset" method="post">
-      {% csrf_token %}
-    </form>
 
-    <!-- <div class="riddle-player" > -->
         <div class="music-player column add-bottom">
           <div id="audio0">
             <div id="player_title"></div>

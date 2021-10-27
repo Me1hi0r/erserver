@@ -8,3 +8,8 @@
 /erp/media/
 /ers/__pycache__/
 /sound/
+/panel/migrations/
+/quest.db.sqlite3
+/panel/__pycache__/
+/panel/templatetags/__pycache__/
+/server/__pycache__/

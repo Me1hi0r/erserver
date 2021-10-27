@@ -11,11 +11,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
-from ers.settings import BASE_DIR, MEDIA_ROOT, DEFAULT_DIR,os
-from erp.models import Panel, Quest, Riddel
-from erp.tools import for_each,  load_current_quest, set_current_quest
-from erp.tools import sorted_riddles, quest_languages, only_langs_sound
-from erp.tools import only_base_sound, load_langs, load_select_lang
+from server.settings import BASE_DIR, MEDIA_ROOT, DEFAULT_DIR,os
+from panel.models import Panel, Quest, Riddel
+from panel.tools import for_each,  load_current_quest, set_current_quest
+from panel.tools import sorted_riddles, quest_languages, only_langs_sound
+from panel.tools import only_base_sound, load_langs, load_select_lang
 
 
 
@@ -180,7 +180,7 @@ def sound_list(request, sound_type, riddle=0):
 @login_required()
 def reset_sound(request):
     if request.method == 'POST':
-        # print("DELETE ALL LANG SOUND")
+        print("DELETE ALL LANG SOUND")
         for sound_type in ['action', 'hint', 'hint_auto', 'background']:
             type_folder = f'{MEDIA_ROOT}{sound_type}/'
             langs_sound = only_langs_sound(type_folder)
@@ -188,7 +188,7 @@ def reset_sound(request):
             for sound in only_langs_sound(type_folder):
                 os.remove(f'{type_folder}{sound}')
 
-        # print("CREATE NEW LANG SOUND")
+        print("CREATE NEW LANG SOUND")
         for riddle in sorted_riddles():
             add_or_del_sounds(riddle.auto_hints, 0, riddle.erp_num, 'hint_auto')
             add_or_del_sounds(riddle.sound_hints, 0, riddle.erp_num, 'hint')

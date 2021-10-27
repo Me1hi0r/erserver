@@ -66,3 +66,23 @@ _in prj dir:_
 **cd ~/**  
 **mkdir .mplayer**  
 **echo nolirc=yes > .mplayer/config**  
+
+#### clean setup
+clean all migration
+delete db
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py createsuperuser
+
+
+
+master onetwo
+operator 1passpass
+
+#### create quest
+login admin
+go to admin panel
+Quests +add
+Panel-States CURRENT QUEST new_quest_name
+
+

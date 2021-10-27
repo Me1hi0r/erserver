@@ -1,5 +1,5 @@
-from erp.models import Panel, Quest
-from ers.settings import BASE_DIR, os
+from .models import Panel, Quest
+from server.settings import BASE_DIR, os
 from shutil import copy2, copyfile
 from os import listdir
 import smtplib, ssl
