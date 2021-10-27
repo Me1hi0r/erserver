@@ -10,9 +10,6 @@ if __name__ == '__main__':
     django.setup()
     try:
         from django.core.management import execute_from_command_line
-        from erp.models import Statistic
-        s = Statistic(status='start server')
-        s.save()
 
     except ImportError as exc:
         raise ImportError("Couldn't import Django.") from exc
