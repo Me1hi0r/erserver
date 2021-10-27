@@ -1,4 +1,17 @@
 import os
+import logging
+
+#logging
+LOGGING_PATH = "erserver.log"
+LOGGING_LVL = logging.INFO
+
+# setup logging
+logging.basicConfig(
+    filename=LOGGING_PATH,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    datefmt='%H:%M:%S',
+    level=LOGGING_LVL)
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -91,13 +104,55 @@ STATIC_URL = '/static/'
 #    os.path.join(BASE_DIR, "static"),
 # ]
 
-MEDIA_ROOT = os.path.join(BASE_DIR,  'erp/media/')
-MEDIA_URL = '/erp/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR,  'erp/media/')
+MEDIA_ROOT = os.path.join(BASE_DIR,  'sound/')
+DEFAULT_DIR = MEDIA_ROOT + 'default/'
+# MEDIA_URL = '/erp/media/'
+MEDIA_URL = '/sound/'
+
+MEDIA_PATH =  "sound"
+HINT_PATH = os.path.join(os.getcwd(), MEDIA_PATH, "hint/")
+ACTION_PATH = os.path.join(os.getcwd(), MEDIA_PATH,"action/")
+AUTO_PATH = os.path.join(os.getcwd(), MEDIA_PATH, "hint_auto/")
+BACK_PATH = os.path.join(os.getcwd(), MEDIA_PATH, "background/")
+DEFAULT_PATH = os.path.join(os.getcwd(), MEDIA_PATH, "default/")
+
 
 USERS = {
     "owner":"secret_pass",
     "operator":"onetwotree4",
     "admin": "istartorpass",
-    # "admin": "angelina",
     "gamemaster": "indestroom",
 }
+
+MQTT_PORT = 1883
+MQTT_HOST = "192.168.10.1"
+TIMER_SUBSCRIBE = ["/ers/timer", "/ers/timer/period"]
+TIMER_TOPIC_OUT = "/er/timer/client/sec"
+LOGGING_PATH = "erserver.log"
+LOGGING_LVL = logging.INFO
+
+
+AUTO_TOPIC_OUT = "/er/async/auto/play"
+AUTO_SUBSCRIBE = ["/er/cmd", "/er/async", "/erp/auto/hint"]
+
+
+PLAYER_SUBSCRIBE = [
+    "/er/async/play",
+    "/er/async/stop",
+    "/er/async/reset",
+    "/er/async/hint/play",
+    "/er/async/auto/play",
+    "/er/async/vol/set",
+
+    "/er/music/play",
+    "/er/music/stop",
+    "/er/mc1/pause",
+    "/er/mc1/resume",
+    "/er/mc1/vol/set",
+
+    "/er/musicback/play",
+    "/er/musicback/stop",
+    "/er/mc2/pause",
+    "/er/mc2/resume",
+    "/er/mc2/vol/set"]

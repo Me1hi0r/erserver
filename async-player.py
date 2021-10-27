@@ -1,53 +1,17 @@
 import os
+import time
 import django
-import paho.mqtt.client as mqtt
-import threading
+import socket
 import logging
-
-from os import getcwd
-from os.path import join
-from time import sleep
+import threading
 from mplayer import *
+import paho.mqtt.client as mqtt
 
 #neccessary for load data from model
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ers.settings")
 django.setup()
-from erp.tools import load_current_quest
-
-#confign
-MQTT_PORT = 1883
-MQTT_HOST = "192.168.10.1"
-SUBSCRIBE = [
-    "/er/async/play",
-    "/er/async/stop",
-    "/er/async/reset",
-    "/er/async/hint/play",
-    "/er/async/auto/play",
-    "/er/async/vol/set",
-
-    "/er/music/play",
-    "/er/music/stop",
-    "/er/mc1/pause",
-    "/er/mc1/resume",
-    "/er/mc1/vol/set",
-
-    "/er/musicback/play",
-    "/er/musicback/stop",
-    "/er/mc2/pause",
-    "/er/mc2/resume",
-    "/er/mc2/vol/set"]
-
-#logging
-LOGGING_PATH = "erserver.log"
-LOGGING_LVL = logging.INFO
-
-#paths
-MEDIA_PATH =  "erp/media"
-HINT_PATH = join(getcwd(), MEDIA_PATH, "hint/")
-ACTION_PATH = join(getcwd(), MEDIA_PATH,"action/")
-AUTO_PATH = join(getcwd(), MEDIA_PATH, "hint_auto/")
-BACK_PATH = join(getcwd(), MEDIA_PATH, "background/")
-DEFAULT_PATH = join(getcwd(), MEDIA_PATH, "default/")
+from erp.tools import load_ln, load_vol
+from ers.settings import MQTT_PORT, MQTT_HOST, PLAYER_SUBSCRIBE, MEDIA_PATH, ACTION_PATH, AUTO_PATH, BACK_PATH, DEFAULT_PATH, HINT_PATH
 
 
 #global vars
@@ -57,24 +21,6 @@ action_player = None
 players = []
 LN = ''
 VOL = 20
-
-# setup logging
-logging.basicConfig(
-    filename=LOGGING_PATH,
-    format='%(asctime)s | %(levelname)s | %(message)s',
-    datefmt='%H:%M:%S',
-    level=LOGGING_LVL)
-
-
-def load_ln():
-    quest = load_current_quest()
-    languages = quest.languages.split(',')
-    return languages[quest.selected_language]
-
-
-def load_vol():
-    quest = load_current_quest()
-    return quest.main_vol
 
 
 def get_sound_path(path, ln, numb):
@@ -115,7 +61,7 @@ def get_sound_path(path, ln, numb):
 
 def create_player(path, sound_numb, is_async):
     global players, LN
-    class Player:
+    class CustomPlayer:
         def __init__(self, song_path, is_async):
             self._is_paused = False if is_async else True
             self._player = Player()
@@ -149,7 +95,7 @@ def create_player(path, sound_numb, is_async):
             self._player.quit()
 
     if is_async:
-        new_player = Player(get_sound_path(path, LN, sound_numb), is_async=True)
+        new_player = CustomPlayer(get_sound_path(path, LN, sound_numb), is_async=True)
         new_player.resume()
 
         #drop dead players
@@ -159,18 +105,21 @@ def create_player(path, sound_numb, is_async):
 
         players.append(new_player)
     else:
-        return Player(get_sound_path(path, LN, sound_numb), is_async=False)
+        return CustomPlayer(get_sound_path(path, LN, sound_numb), is_async=False)
 
+def init_players():
+    global action_player, back_player
+    back_player = create_player(BACK_PATH, '001', is_async=False)
+    action_player = create_player(ACTION_PATH, '001', is_async=False)
+    logging.info(f"player -> initiate")
+    action_player.resume()
 
 def init_music():
     global back_player, action_player, players, LN, VOL
     players = []
     LN = load_ln()
     VOL = load_vol()
-    back_player = create_player(BACK_PATH, '001', is_async=False)
-    action_player = create_player(ACTION_PATH, '001', is_async=False)
-    logging.info(f"player -> initiate")
-    action_player.resume()
+    init_players()
     logging.info(f"player/action -> welcome sound")
     while True:
         pass
@@ -193,8 +142,8 @@ def mqtt_init(topics):
 
     def on_message(client, userdata, message):
         topic = message.topic
-        arr = message.payload.decode("utf-8")
-        manage_music(topic, arr)
+        msg = message.payload.decode("utf-8")
+        manage_music(topic, msg)
 
     client = mqtt.Client()
     client.on_connect = on_connect
@@ -202,19 +151,19 @@ def mqtt_init(topics):
     client.on_disconnect = on_disconnect
 
 
-def manage_music(topic, arr):
+def manage_music(topic, numb):
     global players, action_player, back_player, LN
 
     if topic == "/er/async/play":
-        create_player(MEDIA_PATH, arr, is_async=True)
+        create_player(MEDIA_PATH, numb, is_async=True)
         logging.info(f"player/async -> play")
 
     if topic == "/er/async/hint/play":
-        create_player(HINT_PATH, arr, is_async=True)
+        create_player(HINT_PATH, numb, is_async=True)
         logging.info(f"player/async/hint -> play")
 
     if topic == "/er/async/auto/play":
-        create_player(AUTO_PATH, arr, is_async=True)
+        create_player(AUTO_PATH, numb, is_async=True)
         logging.info(f"player/async/auto -> play")
 
     if topic == "/er/async/stop":
@@ -223,12 +172,17 @@ def manage_music(topic, arr):
         logging.info(f"player/async -> stop")
 
     if topic == "/er/async/reset":
-        LN = load_ln()
+        action_player.quit()
+        back_player.quit()
+
+        for p in players:
+            p.quit()
         players = []
         logging.info(f"player/async -> reset")
+        init_players()
 
     if topic == "/er/music/play":
-        action_player.load(get_sound_path(ACTION_PATH, LN, arr))
+        action_player.load(get_sound_path(ACTION_PATH, LN, numb))
         logging.info(f"player/action -> play")
 
     if topic == "/er/music/stop" or topic == "/er/mc1/pause":
@@ -239,7 +193,7 @@ def manage_music(topic, arr):
         action_player.resume()
 
     if topic == "/er/musicback/play":
-        back_player.load(get_sound_path(BACK_PATH, LN, arr))
+        back_player.load(get_sound_path(BACK_PATH, LN, numb))
         logging.info(f"player/back -> play")
 
     if  topic == "/er/mc2/resume":
@@ -251,25 +205,35 @@ def manage_music(topic, arr):
         logging.info(f"player/back -> stop")
 
     if topic == "/er/mc1/vol/set":
-        action_player.set_volume(int(arr))
-        logging.info(f"player/action/vol -> set {arr}")
+        action_player.set_volume(int(numb))
+        logging.info(f"player/action/vol -> set {numb}")
 
     if topic == "/er/mc2/vol/set":
-        back_player.set_volume(int(arr))
-        logging.info(f"player/back/vol -> set {arr}")
+        back_player.set_volume(int(numb))
+        logging.info(f"player/back/vol -> set {numb}")
 
     if topic == "/er/async/vol/set":
         for player in players:
-            player.set_volume(int(arr))
-        logging.info(f"player/async/vol -> set {arr}")
+            player.set_volume(int(numb))
+        logging.info(f"player/async/vol -> set {numb}")
 
 def mqtt_routine(host, port):
-    client.connect(host, port, 6)
-    client.loop_start()
-    logging.info(f"player/mqtt -> connect to {host}:{port}")
+    try:
+        client.connect(host, port, 6)
+        client.loop_start()
+        logging.info(f"player/mqtt -> connect to {host}:{port}")
+    except socket.timeout:
+        logging.info(f"player/mqtt -> did'n connect to {host}:{port} -> try again after 30 sec")
+        time.sleep(30)
+        mqtt_routine(host, port)
+    except OSError:
+        logging.info(f"player/mqtt -> network is unreachable -> try again after 30 sec")
+        time.sleep(30)
+        mqtt_routine(host, port)
 
 
-mqtt_init(SUBSCRIBE)
+
+mqtt_init(PLAYER_SUBSCRIBE)
 mqtt_routine(MQTT_HOST, MQTT_PORT)
-sleep(.1)
+time.sleep(.1)
 init_music()

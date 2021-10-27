@@ -2,43 +2,20 @@ import os
 import django
 import time
 import logging
+import socket
 from threading import Timer
 import paho.mqtt.client as mqtt
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ers.settings")
 django.setup()
-from erp.tools import load_current_quest
-
-# configuration
-MQTT_PORT = 1883
-MQTT_HOST = "192.168.10.1"
-SUBSCRIBE = ["/ers/timer", "/ers/timer/period"]
-TOPIC_OUT = "/er/timer/client/sec"
-LOGGING_PATH = "erserver.log"
-LOGGING_LVL = logging.INFO
-
+from erp.tools import load_current_quest, str_time
+from ers.settings import MQTT_HOST, MQTT_PORT, TIMER_SUBSCRIBE, TIMER_TOPIC_OUT
 
 # global var
 sec = 0
 status = ""
 timer = None
 client = None
-
-# setup logging
-logging.basicConfig(
-    filename=LOGGING_PATH,
-    format='%(asctime)s | %(levelname)s | %(message)s',
-    datefmt='%H:%M:%S',
-    level=LOGGING_LVL)
-
-
-def str_time(sec):
-    m = str(sec // 60)
-    s = str(sec % 60)
-    if len(s) == 1:
-        s = '0' + s
-    return f"{m}:{s}"
-
 
 def time_init():
     global timer, sec, status
@@ -47,11 +24,11 @@ def time_init():
         global sec, status
         if(status == 'START'):
             sec-=1
-            client.publish(TOPIC_OUT, sec)
+            client.publish(TIMER_TOPIC_OUT, sec)
             if(sec == 0):
                 status = 'STOP'
-            if(status == 'STOP' and sec > 0):
-                client.publish(TOPIC_OUT, sec)
+        if(status == 'STOP' and sec > 0):
+            client.publish(TIMER_TOPIC_OUT, sec)
 
     class CustomTimer(Timer):
         def run(self):
@@ -113,10 +90,21 @@ def mqtt_init(topics):
     client.on_disconnect = on_disconnect
 
 def mqtt_routine(host, port):
-    client.connect(host, port, 6)
-    client.loop_start()
-    logging.info(f"timer/mqtt -> connect to {host}:{port}")
+    try:
+        client.connect(host, port, 6)
+        client.loop_start()
+        logging.info(f"timer/mqtt -> connect to {host}:{port}")
+    except socket.timeout:
+        logging.info(f"timer/mqtt -> did'n connect to {host}:{port} -> try again after 30 sec")
+        time.sleep(30)
+        mqtt_routine(host, port)
+    except OSError:
+        logging.info(f"timer/mqtt -> network is unreachable -> try again after 30 sec")
+        time.sleep(30)
+        mqtt_routine(host, port)
 
-mqtt_init(SUBSCRIBE)
+
+mqtt_init(TIMER_SUBSCRIBE)
 mqtt_routine(MQTT_HOST, MQTT_PORT)
 time_init()
+
