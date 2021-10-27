@@ -12,8 +12,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from ers.settings import BASE_DIR, MEDIA_ROOT, DEFAULT_DIR,os
-from erp.models import Panel, Statistic, Quest, Riddel
-from erp.tools import for_each, send_mail, load_current_quest, set_current_quest
+from erp.models import Panel, Quest, Riddel
+from erp.tools import for_each,  load_current_quest, set_current_quest
 from erp.tools import sorted_riddles, quest_languages, only_langs_sound
 from erp.tools import only_base_sound, load_langs, load_select_lang
 
@@ -229,16 +229,16 @@ def add_or_del_sounds(new, old, num, sound_type):
 
 
 #++++++++++++++MAIL++++++++++++++++++++++++++++++++++++
-def report(request):
-    if request.method == "GET":
-        json = {"status": "mail"}
-        send_mail()
-    return JsonResponse(json)
+# def report(request):
+#     if request.method == "GET":
+#         json = {"status": "mail"}
+#         send_mail()
+#     return JsonResponse(json)
 
 #-----------------DATA----------------------------------
 def data(request):
     if request.method == "GET":
-        print("DATA")
+        # print("DATA")
         q = load_current_quest()
         rn = len( q.riddel_set.all())
         json = {}
@@ -255,22 +255,6 @@ def data(request):
         })
         for number, rid in zip(range(rn), q.riddel_set.all()):
             json['riddles'][number] = {'strId': rid.erp_name, 'strName': rid.panel_name, 'strStatus':"Not activated", 'number': rid.erp_num, 'sound_buttons': rid.sound_hints, 'video_buttons': rid.video_hints}
-        print(json)
-    return JsonResponse(json)
-
-def statistic(request, action=''):
-    if request.method == "GET":
-        if action == 'start':
-            s = Statistic(status='start quest')
-            s.save()
-            json = {"status": "start"}
-        if action == 'reset':
-            s = Statistic(status='reset quest')
-            s.save()
-            json = {"status": "reset"}
-        if action == 'timeup':
-            s = Statistic(status='finish time')
-            s.save()
-            json = {"status": "time up"}
+        # print(json)
     return JsonResponse(json)
 

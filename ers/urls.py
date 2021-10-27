@@ -22,8 +22,5 @@ urlpatterns = [
 
     path('data', v.data),
     path('debug', v.debug),
-    path('report', v.report),
-    path('statistic/<str:action>', v.statistic),
-
     path('upload_sound', v.upload_sound),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
