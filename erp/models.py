@@ -56,12 +56,12 @@ class Riddel(models.Model):
         return f"{self.quest}: {self.erp_num}-{self.erp_name}"
 
 
-class Statistic(models.Model):
-    class Meta:
-        verbose_name = "Statistic"
-    id = models.AutoField(primary_key=True)
-    time = models.DateTimeField(default=now)
-    status = models.CharField(max_length=15, default="")
+# class Statistic(models.Model):
+#     class Meta:
+#         verbose_name = "Statistic"
+#     id = models.AutoField(primary_key=True)
+#     time = models.DateTimeField(default=now)
+#     status = models.CharField(max_length=15, default="")
 
-    def __str__(self):
-        return self.status
+#     def __str__(self):
+#         return self.status
