@@ -1,5 +1,4 @@
 var riddlesInfo = [];
-console.log("js");
 
 document.addEventListener("DOMContentLoaded", (e) => {
   e.preventDefault();
@@ -18,14 +17,14 @@ document.addEventListener("DOMContentLoaded", (e) => {
       // mqtt_publish("", "/ers/timer");
       mqtt_publish("", "/er/musicback/play");
       console.log("start");
-      fetch("/statistic/start", {
-        headers: {
-          Accept: "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      }).then((response) => {
-        return response.json();
-      });
+      // fetch("/statistic/start", {
+      //   headers: {
+      //     Accept: "application/json",
+      //     "X-Requested-With": "XMLHttpRequest",
+      //   },
+      // }).then((response) => {
+      //   return response.json();
+      // });
     },
     false
   );
@@ -44,18 +43,20 @@ document.addEventListener("DOMContentLoaded", (e) => {
     (e) => {
       e.preventDefault();
       console.log("reset");
-      mqtt_publish("stop", "/er/clients");
-      mqtt_publish("reset", "/er/cmd");
-      mqtt_publish("002", "/er/music/play");
+      mqtt_publish("", "/er/async/reset");
       mqtt_publish("reset", "/ers/timer");
-      fetch("/statistic/reset", {
-        headers: {
-          Accept: "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      }).then((response) => {
-        return response.json();
-      });
+      mqtt_publish("reset", "/erp/auto/hint");
+      mqtt_publish("reset", "/er/cmd");
+      mqtt_publish("stop", "/er/clients");
+      // mqtt_publish("002", "/er/music/play");
+      // fetch("/statistic/reset", {
+      //   headers: {
+      //     Accept: "application/json",
+      //     "X-Requested-With": "XMLHttpRequest",
+      //   },
+      // }).then((response) => {
+      //   return response.json();
+      // });
     },
     false
   );
@@ -75,7 +76,7 @@ document.addEventListener("DOMContentLoaded", (e) => {
       return response.json();
     })
     .then((data) => {
-      console.warn("DATA", data);
+      // console.warn("DATA", data);
       Object.values(data.riddles).forEach((element) => {
         let rid = {
           strId: element.strId,
@@ -283,23 +284,23 @@ function mqtt_subscribe(topic, _qos) {
 }
 
 function mqtt_connect() {
-  console.log("connect");
+  // console.log("connect");
   client.connect(options);
 }
 
 function msgs_check(topicStr, dataStr) {
   if (topicStr == "/er/timer/client/sec") {
     progress(dataStr);
-    if (parseInt(dataStr) == 0) {
-      fetch("/statistic/timeup", {
-        headers: {
-          Accept: "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      }).then((response) => {
-        return response.json();
-      });
-    }
+    // if (parseInt(dataStr) == 0) {
+    //   fetch("/statistic/timeup", {
+    //     headers: {
+    //       Accept: "application/json",
+    //       "X-Requested-With": "XMLHttpRequest",
+    //     },
+    //   }).then((response) => {
+    //     return response.json();
+    //   });
+    // }
   } else if (topicStr == "/er/riddles/info") {
     // console.log(dataStr)
     changeRiddleStatus(parseJSON(dataStr));

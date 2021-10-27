@@ -1,5 +1,6 @@
 .wrap-riddle {
   background: linear-gradient(45deg, #f64f59, #c471ed, #12c2e9);
+  min-height: 100%;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -46,7 +47,7 @@
 }
 
 .card {
-  margin: 20px auto;
+    margin: 20px; 
   /* width: 600px;
   height: 150px; */
   min-width: 600px;
