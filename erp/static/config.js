@@ -98,9 +98,7 @@ var options = {
       mqtt_subscribe(e);
       console.log("MQTT: Subscribed: " + e);
     });
-    mqtt_publish("reset", "/ers/timer");
-    mqtt_publish("reset", "/erp/auto/hint");
-    mqtt_publish("reset", "/er/async");
+    console.log("SUCCES");
   },
   onFailure: (message) => {
     console.log(
@@ -201,8 +199,8 @@ document.addEventListener("DOMContentLoaded", (e) => {
     byId("time-set-label").innerText = `game duration ${
       val < 10 ? "0" : ""
     }${val}m`;
-    mqtt_publish(val, "/ers/timer/period");
-    mqtt_publish(val, "/er/timer/period");
+    // mqtt_publish(val, "/ers/timer/period");
+    // mqtt_publish(val, "/er/timer/period");
   });
 
   byName("back_vol").addEventListener("input", (e) => {
@@ -224,26 +222,32 @@ document.addEventListener("DOMContentLoaded", (e) => {
 
   byName("selected_language").addEventListener("change", (e) => {});
 
-  byId("btnReport").addEventListener("click", (e) => {
-    e.preventDefault();
-    fetch("/report", {
-      headers: {
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      },
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-      });
-  });
+  // byId("btnReport").addEventListener("click", (e) => {
+  //   e.preventDefault();
+  //   fetch("/report", {
+  //     headers: {
+  //       Accept: "application/json",
+  //       "X-Requested-With": "XMLHttpRequest",
+  //     },
+  //   })
+  //     .then((response) => {
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       console.log(data);
+  //     });
+  // });
 
   byId("btnSave").addEventListener("click", (e) => {
     e.preventDefault();
-    // mqtt_publish('reset', '/er/async');
-    // mqtt_publish('reset', '/ers/timer');
+    // mqtt_publish("reset", "/er/async");
+    mqtt_publish("", "/er/async/reset");
+    // setTimeout(() => {
+    console.log("TIME OUT");
+    mqtt_publish("reset", "/ers/timer");
+    // }, 1000);
+
+    mqtt_publish("reset", "/erp/auto/hint");
     i = document.createElement("input");
     i.hidden = true;
     i.name = "rid-count";
