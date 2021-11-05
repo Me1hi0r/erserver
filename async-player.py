@@ -8,10 +8,10 @@ from mplayer import *
 import paho.mqtt.client as mqtt
 
 #neccessary for load data from model
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ers.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
 django.setup()
-from erp.tools import load_ln, load_vol
-from ers.settings import MQTT_PORT, MQTT_HOST, PLAYER_SUBSCRIBE, MEDIA_PATH, ACTION_PATH, AUTO_PATH, BACK_PATH, DEFAULT_PATH, HINT_PATH
+from panel.tools import load_ln, load_vol
+from server.settings import MQTT_PORT, MQTT_HOST, PLAYER_SUBSCRIBE, MEDIA_PATH, ACTION_PATH, AUTO_PATH, BACK_PATH, DEFAULT_PATH, HINT_PATH
 
 
 #global vars

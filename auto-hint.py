@@ -7,10 +7,10 @@ import threading
 import paho.mqtt.client as mqtt
 
 #neccessary for load data from model
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ers.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
 django.setup()
-from erp.tools import load_ln, quest_riddles
-from ers.settings import MQTT_HOST, MQTT_PORT, AUTO_TOPIC_OUT, AUTO_SUBSCRIBE
+from panel.tools import load_ln, quest_riddles
+from server.settings import MQTT_HOST, MQTT_PORT, AUTO_TOPIC_OUT, AUTO_SUBSCRIBE
 
 RID_LIST = []
 LN = None

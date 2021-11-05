@@ -6,10 +6,10 @@ import socket
 from threading import Timer
 import paho.mqtt.client as mqtt
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ers.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
 django.setup()
-from erp.tools import load_current_quest, str_time
-from ers.settings import MQTT_HOST, MQTT_PORT, TIMER_SUBSCRIBE, TIMER_TOPIC_OUT
+from panel.tools import load_current_quest, str_time
+from server.settings import MQTT_HOST, MQTT_PORT, TIMER_SUBSCRIBE, TIMER_TOPIC_OUT
 
 # global var
 sec = 0
