@@ -5,7 +5,7 @@ import operator
 from functools import reduce
 # from os.sound_folder import join
 from shutil import copy2, copyfile
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
@@ -16,7 +16,7 @@ from panel.models import Panel, Quest, Riddel
 from panel.tools import for_each,  load_current_quest, set_current_quest
 from panel.tools import sorted_riddles, quest_languages, only_langs_sound
 from panel.tools import only_base_sound, load_langs, load_select_lang
-
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def log_in(request):
@@ -49,9 +49,18 @@ def debug(request):
 
 @login_required()
 def panel(request):
-    return render(request, "panel.html", {
-        'quest_riddles': sorted_riddles()
-    })
+    try:
+        riddles = sorted_riddles()
+    except ObjectDoesNotExist:
+        return redirect('/info')
+    else:
+        return render(request, "panel.html", {
+            'quest_riddles': riddles
+        })
+
+@login_required()
+def info(request):
+    return render(request, "info.html", {})
 
 @login_required()
 def sound(request):
@@ -83,14 +92,6 @@ def config(request, action=''):
             'languages': q.languages,
             'selected_language': q.selected_language,
             'separate_languages': load_langs()})
-
-    if request.method == 'POST' and action == 'new':
-        name = request.POST.get('new-quest-name')
-        new_quest = Quest.objects.create(name=name)
-        new_quest.save()
-        set_current_quest(name)
-        logging.info(f"panel/config -> create new configuration of quest {name} and set it")
-        return HttpResponseRedirect("/config")
 
     if request.method == 'POST' and action == 'load':
         name = request.POST.get('load-quest-name')
@@ -228,14 +229,6 @@ def add_or_del_sounds(new, old, num, sound_type):
         logging.info(f"panel/sound-managment -> delete {-diff} sound in {sound_type} sound_type")
 
 
-#++++++++++++++MAIL++++++++++++++++++++++++++++++++++++
-# def report(request):
-#     if request.method == "GET":
-#         json = {"status": "mail"}
-#         send_mail()
-#     return JsonResponse(json)
-
-#-----------------DATA----------------------------------
 def data(request):
     if request.method == "GET":
         # print("DATA")
@@ -255,6 +248,5 @@ def data(request):
         })
         for number, rid in zip(range(rn), q.riddel_set.all()):
             json['riddles'][number] = {'strId': rid.erp_name, 'strName': rid.panel_name, 'strStatus':"Not activated", 'number': rid.erp_num, 'sound_buttons': rid.sound_hints, 'video_buttons': rid.video_hints}
-        # print(json)
     return JsonResponse(json)
 

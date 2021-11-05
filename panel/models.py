@@ -3,14 +3,14 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now
 
 
-class Panel(models.Model):
-    class Meta:
-        verbose_name = "Panel-State"
-    id = models.AutoField(primary_key=True)
-    quest = models.CharField(max_length=30)
+# class Panel(models.Model):
+#     class Meta:
+#         verbose_name = "Panel-State"
+#     id = models.AutoField(primary_key=True)
+#     quest = models.CharField(max_length=30)
 
-    def __str__(self):
-        return f"CURRENT QUEST: {self.quest}"
+#     def __str__(self):
+#         return f"CURRENT QUEST: {self.quest}"
 
 class Quest(models.Model):
     id = models.AutoField(primary_key=True)
@@ -56,12 +56,11 @@ class Riddel(models.Model):
         return f"{self.quest}: {self.erp_num}-{self.erp_name}"
 
 
-# class Statistic(models.Model):
-#     class Meta:
-#         verbose_name = "Statistic"
-#     id = models.AutoField(primary_key=True)
-#     time = models.DateTimeField(default=now)
-#     status = models.CharField(max_length=15, default="")
+class Panel(models.Model):
+    class Meta:
+        verbose_name = "Selected quest"
+    id = models.AutoField(primary_key=True)
+    quest = models.ForeignKey(Quest, on_delete=models.DO_NOTHING)
 
-#     def __str__(self):
-#         return self.status
+    def __str__(self):
+        return f"CURRENT QUEST: {self.quest}"

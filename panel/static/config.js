@@ -175,15 +175,6 @@ document.addEventListener("DOMContentLoaded", (e) => {
     byId("main-form").action = "/config/load";
     byId("main-form").submit();
   });
-  byId("new-quest-block").addEventListener("input", (e) => {
-    console.log("eeee");
-    byId("new-quest-button").hidden = false;
-  });
-  byId("new-quest-button").addEventListener("click", (e) => {
-    e.preventDefault();
-    byId("main-form").action = "/config/new";
-    byId("main-form").submit();
-  });
   byId("btnReset").addEventListener("click", (e) => {
     e.preventDefault();
     alert(

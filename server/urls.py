@@ -12,6 +12,7 @@ urlpatterns = [
     path('accounts/<str:action>/', v.authentification),
 
     path('panel', v.panel),
+    path('info', v.info),
     path('sound', v.sound),
     path('config', v.config),
     path('config/<str:action>', v.config),

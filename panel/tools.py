@@ -22,12 +22,12 @@ def for_each(arr):
     return out_arr
 
 def load_current_quest():
-    name = Panel.objects.get(pk=1).quest
-    return Quest.objects.get(name=name)
+    name = Panel.objects.filter()[:1].get()
+    return Quest.objects.get(name=name.quest)
 
 def set_current_quest(name):
-    panel = Panel.objects.get(pk=1)
-    panel.quest = name
+    panel = Panel.objects.filter()[:1].get()
+    panel.quest = Quest.objects.get(name=name)
     panel.save()
 
 def sorted_riddles():

@@ -15,6 +15,7 @@
     <nav>
       <ul class="nav-bar-ul">
         <li {% if not user.is_superuser %} style="display: none" {% endif %}><a href="/admin">ADMIN</a></li>
+        <li {% if not user.is_superuser %} style="display: none" {% endif %}><a href="/info">INFO</a></li>
         <li {% if not user.is_superuser %} style="display: none" {% endif %}><a href="/debug">DEBUG</a></li>
 
         <li><a href="/panel">panel</a></li>
@@ -36,18 +37,11 @@
               {% for conf in all_other_quest %}
               <option>{{conf}}</option>
               {% endfor %}
-              <option>NEW QUEST</option>
             </select>
-          </div>
-          <div class="element" id="new-quest-block" hidden>
-            NAME:
-            <input class="inp name" name="new-quest-name" type="input" value=""></input>
-          </div>
-          <div class="element" id="new-quest-button" hidden>
-            <input class="inp name" type="button" value="CREATE"></input>
-          </div>
-          <div class="element" id="load-quest-button" hidden>
-            <input class="inp name" type="button" value="LOAD"></input>
+
+            <div class="element" id="load-quest-button" hidden>
+                <input class="inp name" type="button" value="LOAD"></input>
+            </div>
           </div>
           <div class="element">
               DIFICULT:
